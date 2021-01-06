@@ -1,11 +1,11 @@
 import React from 'react';
 import {Card} from 'semantic-ui-react';
 
-const SCard = (props) => {
+const SCard = ({children,...rest}) => {
     return (
-        <Card fluid={true}>
+        <Card fluid={true} {...rest}>
             <Card.Content>
-                {props.children}
+                {children}
             </Card.Content>
         </Card>
     );

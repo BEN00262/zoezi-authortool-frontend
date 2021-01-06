@@ -34,9 +34,6 @@ const QuestionComp = ({retrievedQuestion,index}) => {
     return (
         <SCard>
             <Form style={{marginBottom:"10px"}}>
-                <Label color='green' ribbon='right'>
-                    {retrievedQuestion ? retrievedQuestion.status.toUpperCase() : "ONGOING"}
-                </Label>
                 <Form.Field>
                     <label htmlFor="questionType">Select the question type</label>
 

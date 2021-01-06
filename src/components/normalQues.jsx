@@ -90,11 +90,16 @@ const NormalQuestionComp = ({questionType,retrievedQuestion,index}) => {
         addQuestion(createdQuestion,index,authToken)
     }
 
+    const handleImageUploadBefore = (files, info, uploadHandler) => {
+        // uploadHandler is a function
+        console.log(files, info)
+    }
+
     return (
         <>
             <Form onSubmit={saveQuestion}>
             <Form.Field>
-                <SunEditor  onChange={(content) => setQuestion(content) } setContents={question} enableToolbar={true}/>
+                <SunEditor autoFocus={true}   onChange={(content) => setQuestion(content) } setContents={question} showToolbar={true}  onImageUploadBefore={handleImageUploadBefore} enableToolbar={true}/>
             </Form.Field>
             <Form.Field>
                 <Button primary onClick={handleAddOptions} icon="add" content="Add Option" labelPosition="right"/>
@@ -111,7 +116,7 @@ const NormalQuestionComp = ({questionType,retrievedQuestion,index}) => {
                                     <input value={retrievedQuestion ? foundOption.option : null} onChange={(e) => handleOptionsInput(e,index)} type="text"/>
                                 </Form.Field>
 
-                                <Button color="red" icon onClick={(e) => removeOption(e,index)}>
+                                <Button basic color="red" icon onClick={(e) => removeOption(e,index)}>
                                     <Icon name="trash alternate outline"/>
                                 </Button>
                             </Form.Group>
