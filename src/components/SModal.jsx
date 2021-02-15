@@ -1,12 +1,43 @@
 import React,{useState} from "react";
-import { Button, Header, Form,Checkbox, Modal } from 'semantic-ui-react'
+import { Button, Form, Modal,Dropdown } from 'semantic-ui-react';
 
-const SModal = ({handleInputChange,createPaper}) => {
+const options = [
+  { key: 1, text: 'One', value: "one" },
+  { key: 2, text: 'Two', value: "two" },
+  { key: 3, text: 'KCPE', value: "kcpe" },
+]
+
+const DEFAULT_GRADE = "one";
+
+const SModal = ({createPaper}) => {
     const [open, setOpen] = useState(false)
     
+    const [paper,setPaper] = useState({
+        grade:DEFAULT_GRADE,
+        subject:"",
+        paperType:""
+    })
+
     const handleSubmit = (e) => {
-        createPaper();
+        e.preventDefault();
+        createPaper(paper);
         setOpen(false);
+    }
+
+    const handleInputChange = (e) => {
+        setPaper({...paper,[e.target.name]:e.target.value});
+    }
+    
+    const handleGradeSelection = (_,{ value }) => {
+        setPaper({
+          ...paper,
+          grade:value
+        });
+    }
+
+    const handleOnClose = (e) => {
+      e.preventDefault();
+      setOpen(false);
     }
 
   return (
@@ -17,12 +48,19 @@ const SModal = ({handleInputChange,createPaper}) => {
       open={open}
       trigger={<Button fluid color="brown" content='create paper' icon='pencil alternate' labelPosition='right'/>}
     >
-      <Modal.Header>Paper creation</Modal.Header>
-      <Modal.Content>
+      <Modal.Header>New Paper</Modal.Header>
+        <Modal.Content>
         <Form>
             <Form.Field>
                 <label>Grade</label>
-                <input placeholder='Grade' name="grade" onChange={handleInputChange}/>
+                <Dropdown
+                        onChange={handleGradeSelection}
+                        selection
+                        fluid
+                        defaultValue = {DEFAULT_GRADE}
+                        options={options}
+                        placeholder='Select Grade'
+                    />
             </Form.Field>
             <Form.Field>
                 <label>Subject</label>
@@ -31,22 +69,16 @@ const SModal = ({handleInputChange,createPaper}) => {
             <Form.Field>
                 <label>Paper Type</label>
                 <input placeholder='Paper Type' name="paperType" onChange={handleInputChange}/>
-            </Form.Field>
+            </Form.Field> 
         </Form>
-
-      </Modal.Content>
-      <Modal.Actions>
-        <Button color='black' onClick={() => setOpen(false)}>
-          Cancel
-        </Button>
-        <Button
-          content="Create Paper"
-          labelPosition='right'
-          icon='checkmark'
-          onClick={handleSubmit}
-          positive
-        />
-      </Modal.Actions>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button.Group>
+            <Button color='black' onClick={handleOnClose}>Cancel</Button>
+            <Button.Or />
+            <Button onClick={handleSubmit} positive>Create Paper</Button>
+          </Button.Group>
+        </Modal.Actions>
     </Modal>
   )
 }

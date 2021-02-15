@@ -1,16 +1,31 @@
 import React,{createContext,useReducer} from "react";
-
+import { store } from 'react-notifications-component';
 import reducer from "./reducer";
 import axios from "axios";
+import jwt_decode from "jwt-decode";
 
+const verifyToken = () => {
+    const token = localStorage.getItem("authToken");
+    try{
+        const { exp } = jwt_decode(token);
 
-axios.defaults.baseURL = 'http://localhost:4000';
+        if (Date.now() >= exp * 1000) {
+            return null;
+        }
+
+        return token;
+    }catch(error) {
+        return null;
+    }
+}
+
+axios.defaults.baseURL = 'http://localhost:3500';
 
 // first fetch the token from the localstorage if it exists
 
 let initialContext = {
-    authToken:localStorage.getItem("authToken"),
-    isAdmin:false,
+    authToken:verifyToken(),
+    roles:localStorage.getItem("roles") ? localStorage.getItem("roles").split(",") : [],
     isSubmitted:false,
     paperID:"",
     paperName:"",
@@ -23,97 +38,81 @@ export const PaperContext = createContext(initialContext);
 const PaperProvider = ({children}) => {
     const [state,dispatch] = useReducer(reducer,initialContext);
 
-    // have a login dispatch
-    const loginDispatch = (token,isAdmin) => {
-        localStorage.setItem("authToken",token);
-        dispatch({
-            type:"SET_LOGIN_TOKEN",
-            payload:{
-                token,
-                isAdmin
+    const createNotification = (notificationTitle,notificationType,notificationMessage) => {
+        console.log(notificationMessage);
+        console.log(notificationTitle);
+        console.log(notificationType);
+
+        store.addNotification({
+            title: notificationTitle,
+            message: notificationMessage,
+            type: notificationType,
+            insert: "top",
+            container: "top-right",
+            animationIn: ["animate__animated", "animate__fadeIn"],
+            animationOut: ["animate__animated", "animate__fadeOut"],
+            dismiss: {
+              duration: 2000,
+              onScreen: true
             }
-        })
+          });
     }
 
-    const removeQuestionDispatch = (questionId,index,token) => {
-        if(questionId){
-            axios.delete(`/remove-question/${questionId}`,{
-                headers:{
-                    AuthToken:token
+    const loginDispatch = (loginCreds) => {
+        axios.post("/user/login",loginCreds)
+            .then(({data}) => {
+                if(data.success){
+                    localStorage.setItem("authToken",data.token);
+                    localStorage.setItem("roles",data.roles);
+                    dispatch({
+                        type: "SET_LOGIN_TOKEN",
+                        payload: {
+                            token:data.token,
+                            roles:data.roles
+                        }
+                    })
+                    createNotification("Success!","success","Welcome");
+                }else{
+                    throw new Error("There was an error");
+
                 }
             })
-            .then(() => {
-                dispatch({
-                    type:"REMOVE_QUESTION",
-                    payload:{
-                        index
-                    }
-                })
+            .catch(error =>{
+                createNotification("Error!","error",error.message);
             })
-        }else{
-            dispatch({
-                type:"REMOVE_QUESTION",
-                payload:{
-                    index
-                }
-            })
-        }
     }
 
-    const addQuestion = (questionSent,index=0,token) => {
-        questionSent.paperID = state.paperID;
-        if(questionSent.question_id){
-            // use the index to update a given question
-            axios.post("update-question",questionSent,{
-                headers:{
-                    AuthToken:token
-                }
-            })
-                .then(({data}) => {
-                    dispatch({
-                        type:"UPDATE_QUESTION",
-                        payload: {
-                            data,
-                            index
-                        }
-                    })
-                })
-        }else{
-            axios.post("create-question",questionSent,{
-                headers:{
-                    AuthToken:token
-                }
-            })
-                .then(({data}) => {
-                    dispatch({
-                        type:"ADD_QUESTION",
-                        payload: {
-                            data,
-                            index
-                        }
-                    })
-                })
-        }
-    }
-    // create dispatchers
-    // we fetch the questions first then set the id afterwards
-    const changePaperID = (paperID,token) => {
-        axios.get(`paper-questions/${paperID}`,{
+    const removeQuestionDispatch = (questionId,token) => {
+        return axios.delete(`/remove-question/${questionId}`,{
             headers:{
                 AuthToken:token
             }
         })
-            .then(({data}) => {
-                dispatch({
-                    type:"CHANGE_PAPER_ID",
-                    payload:{
-                        paperID:data._id,
-                        currentQuestions:data.questions,
-                        isSub:data.isSubmitted
-                    }
-                })
-            })
-            .catch(console.log) // dispatch an error later
+    }
+
+    const fetchQuestions = (paperID,token) => {
+        return axios.get(`/paper-questions/${paperID}`,{
+            headers:{
+                AuthToken:token
+            }
+        });
+    }
+
+    const addQuestion = (questionSent,token) => {
+        return axios.post("/create-question",questionSent,{
+                headers:{
+                    AuthToken:token
+                }
+            });
+    }
+
+    const changePaperID = (paperID) => {
+        dispatch({
+            type:"CHANGE_PAPER_ID",
+            payload:{
+                paperID
+            }
+        })
     }
 
     const fetchPapers = (token) => {
@@ -121,13 +120,21 @@ const PaperProvider = ({children}) => {
             headers:{
                 AuthToken:token
             }
-        }).then(({data}) => {
-                dispatch({
-                    type:"FETCH_PAPERS",
-                    payload:data.papers
-                })
+        })
+        .then(({data}) => {
+                if(data){
+                    dispatch({
+                        type:"FETCH_PAPERS",
+                        payload:data
+                    })
+                }else{
+                    throw new Error("Failed to fetch papers");
+                }
             })
-            .catch(console.log) // dispatch an error later
+        .catch(error => {
+            console.log(error);
+            // createNotification("Error!","error",error.message);
+        })
     }
 
     const createPaperDispatch = (paper,token) =>{
@@ -137,12 +144,23 @@ const PaperProvider = ({children}) => {
             }
         })
             .then(({data}) => {
-                dispatch({
-                    type:"CREATE_PAPER",
-                    payload:data
-                })
+                if(data.success){
+                    dispatch({
+                        type:"CREATE_PAPER",
+                        payload:data.paper
+                    });
+                    createNotification("Success!","success","Paper created successfully");
+                }else{
+                    console.log(data)
+                    data.errors.forEach(error => {
+                        createNotification("Error!","error",error);
+                    })
+                }
             })
-            .catch(console.log) // dispatch an error later
+            .catch(error => {
+                console.log(error);
+                createNotification("Error!","error",error.message);
+            })
     }
 
     const addQuestionDispatch = () => {
@@ -152,42 +170,21 @@ const PaperProvider = ({children}) => {
     }
 
     const submitPaperDispatch = (paperID,token) => {
-        axios.post("submit-paper",{
+        return axios.post("/submit-paper",{
             paperID
         },{
             headers:{
                 AuthToken:token
             }
-        })
-            .then(({data}) => {
-                if(data.success){
-                    // dispatch a refetch --> will optimize later
-                    fetchPapers(token);
-                }
-                // inform the user that something went wrong
-            })
-            .catch(console.log) // dispatch an error later
+        });
     }
 
     const approveQuestionDispatch = (id,index,token) => {
-        // approve the question here
-        axios.get(`approve-question/${id}`,{
+        return axios.get(`approve-question/${id}`,{
             headers:{
                 AuthToken:token
             }
-        })
-            .then(({data}) => {
-                if(data.success){
-                    dispatch({
-                        type:"APPROVE_QUESTION",
-                        payload:{
-                            data:data.data,
-                            index
-                        }
-                    })
-                }
-            })
-            .catch(console.log) // dispatch an error later
+        });
     }
 
     return(
@@ -198,14 +195,16 @@ const PaperProvider = ({children}) => {
             changePaperID,
             createPaperDispatch,
             fetchPapers,
+            fetchQuestions,
             addQuestion,
             addQuestionDispatch,
             removeQuestionDispatch,
             loginDispatch,
             approveQuestionDispatch,
             submitPaperDispatch,
+            createNotification,
+            roles: state.roles,
             isSubmitted:state.isSubmitted,
-            isAdmin:state.isAdmin,
             currentQuestions:state.currentQuestions,
         }}>
             {children}

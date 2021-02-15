@@ -11,7 +11,7 @@ const reducer = (state,action) => {
         case "SET_LOGIN_TOKEN":
             return produce(state,newState => {
                 newState.authToken = action.payload.token;
-                newState.isAdmin = action.payload.isAdmin;
+                newState.roles = action.payload.roles;
             })
         case "UPDATE_QUESTION":
             return produce(state,newState => {
@@ -20,10 +20,6 @@ const reducer = (state,action) => {
         case "REMOVE_QUESTION":
             return produce(state,newState => {
                 newState.currentQuestions.splice(action.payload.index,1);
-            })
-        case "ADD_QUESTION":
-            return produce(state,newState => {
-                newState.currentQuestions[action.payload.index] = action.payload.data;
             })
         case "ADD_QUESTION_TO_STACK":
             // improve on this
@@ -44,11 +40,8 @@ const reducer = (state,action) => {
                })
             })
         case "CHANGE_PAPER_ID":
-            let myLocalState = {...state,currentQuestions:[]}
+            let myLocalState = {...state}
             myLocalState.paperID = action.payload.paperID;
-            myLocalState.currentQuestions = action.payload.currentQuestions;
-            myLocalState.paperName = action.payload.paperName;
-            myLocalState.isSubmitted = action.payload.isSub;
             return myLocalState;
 
         case "CREATE_PAPER":
@@ -56,14 +49,11 @@ const reducer = (state,action) => {
 
             localState.paperID = action.payload._id;
             localState.paperName = action.payload.paperName;
-            localState.currentQuestions = [];
             
             if(!localState.papers[action.payload.paperType]){
-                localState.papers[action.payload.paperType] = {
-                    papers:[]
-                };
+                localState.papers[action.payload.paperType] = { papers:[] };
             }
-
+            
             localState.papers[action.payload.paperType].papers.push({name:action.payload.paperName,id:action.payload._id});
             return localState;
         default:

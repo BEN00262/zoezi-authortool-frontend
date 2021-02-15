@@ -1,12 +1,12 @@
 import React,{useState,useContext} from "react";
 import { Button, Form } from 'semantic-ui-react';
-import axios from "axios";
 import {Redirect} from "react-router-dom";
 
 import {PaperContext} from "../context/paperContext";
 
 const FormComp = () => {
     const {loginDispatch,authToken} = useContext(PaperContext);
+
     const [loginData,setLoginData] = useState({
         email:"",
         password:""
@@ -21,16 +21,9 @@ const FormComp = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-       
-        axios.post("/user/login",loginData)
-            .then(({data}) => {
-                if(data.success){
-                    loginDispatch(data.token,data.isAdmin);
-                }else{
-                    console.log("There was an error");
-                }
-            })
-            .catch(console.log)
+
+        console.log(loginData);
+        loginDispatch(loginData);
     }
 
     if(authToken){

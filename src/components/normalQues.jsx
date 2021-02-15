@@ -1,49 +1,57 @@
-import React,{useState,useContext,useEffect} from "react";
+import React,{useState,useEffect} from "react";
 import SunEditor from 'suneditor-react';
 import {Button,Icon,Form,Checkbox} from "semantic-ui-react";
 
-import {PaperContext} from "../context/paperContext";
+import Topic from './topic';
 
-const NormalQuestionComp = ({questionType,retrievedQuestion,index}) => {
-    const {addQuestion,authToken} = useContext(PaperContext);
+const QUESTION_TYPE = "normal";
+const EDITOR_OPTIONS = [
+    ['undo', 'redo', 'font', 'fontSize', 'formatBlock'],
+    ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript', 'removeFormat'],
+    ['fontColor', 'hiliteColor', 'outdent', 'indent', 'align', 'horizontalRule', 'list', 'table'],
+    ['image', 'fullScreen', 'showBlocks', 'preview']
+];
 
-    // reduce the state to one item only
-
-    retrievedQuestion = retrievedQuestion || {};
-
+// use the index to change the question's content on save or updating
+const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index}) => {
     const [question,setQuestion] = useState("");
+    const [topic,setTopic] = useState({
+        topic:" ",
+        subTopic:" "
+    });
     const [options,setOptions] = useState([]);
     const [additionalInfo,setAdditionalInfo] = useState("");
 
-    /**
-     * {
-     *      question,
-     *      options:[
-     *          {
-     *              isCorrect:Boolean,
-     *              option:""
-     *          }
-     *      ],
-     *      additionalInfo
-     * }
-     */
-    // const [normalQuestion,setNormalQuestion] = useState(retrievedQuestion);
-
     useEffect(() => {
         let initialQuestion = retrievedQuestion && retrievedQuestion.question ? retrievedQuestion.question : "";    
-        let initialOptions = retrievedQuestion && retrievedQuestion.options ?retrievedQuestion.options  : [];
+        let initialOptions = retrievedQuestion && retrievedQuestion.options ?retrievedQuestion.options.map(({option,isCorrect}) => {
+            return {option,isCorrect};
+        })  : [];
         let initialAdditional = retrievedQuestion && retrievedQuestion.additionalInfo ? retrievedQuestion.additionalInfo : "";
+        
+        let initialTopicAndSubtopic = retrievedQuestion && retrievedQuestion.topic ? {
+            topic: retrievedQuestion.topic,
+            subTopic: retrievedQuestion.subTopic
+        } : {
+            topic:" ",
+            subTopic:" "
+        };
 
+        setTopic(initialTopicAndSubtopic);
         setQuestion(initialQuestion);
         setOptions(initialOptions);
         setAdditionalInfo(initialAdditional);
-    },[retrievedQuestion]);
+    },[]);
+
+    const handleSetTopic = (e) => {
+        setTopic({
+            ...topic,
+            [e.target.name]:e.target.value
+        });
+    }
 
     const handleAddOptions = (e) => {
         e.preventDefault();
-        // let localState = {...normalQuestion,option:[...normalQuestion.options]};
-        // localState.push({option:"",isCorrect:false})
-        // setNormalQuestion(localState)
         setOptions([...options,{option:"",isCorrect:false}]);
     }
 
@@ -68,38 +76,41 @@ const NormalQuestionComp = ({questionType,retrievedQuestion,index}) => {
 
     const handleAddAdditionalInfo = (e) => {
         e.preventDefault();
-
         setAdditionalInfo(" ");
     }
 
-    const handleAdditionalText = (e) => {
-        setAdditionalInfo(e.target.value);
+    // const handleAdditionalText = (e) => {
+    //     setAdditionalInfo(e.target.value);
+    // }
+
+    const handleAdditionalTextE = (text) => {
+        setAdditionalInfo(text);
     }
 
     const saveQuestion = (e) => {
         e.preventDefault();
 
         let createdQuestion = {
-            questionType:retrievedQuestion ? retrievedQuestion.questionType :questionType,
+            questionType: QUESTION_TYPE,
             question_id: retrievedQuestion ? retrievedQuestion._id : null,
             question,
             options,
+            topic: topic.topic,
+            subTopic: topic.subTopic,
             additionalInfo:additionalInfo ? additionalInfo : ""
         }
 
-        addQuestion(createdQuestion,index,authToken)
-    }
-
-    const handleImageUploadBefore = (files, info, uploadHandler) => {
-        // uploadHandler is a function
-        console.log(files, info)
+        saveQuestionToDatabase(createdQuestion,index);
     }
 
     return (
         <>
             <Form onSubmit={saveQuestion}>
+            <Topic handleTopicAndSubject={handleSetTopic} topic={topic.topic} subtopic={topic.subTopic}/>
             <Form.Field>
-                <SunEditor autoFocus={true}   onChange={(content) => setQuestion(content) } setContents={question} showToolbar={true}  onImageUploadBefore={handleImageUploadBefore} enableToolbar={true}/>
+                <SunEditor autoFocus={true}  setOptions={{
+                      buttonList : EDITOR_OPTIONS,
+                }} onChange={(content) => setQuestion(content) } setContents={question} showToolbar={true} enableToolbar={true}/>
             </Form.Field>
             <Form.Field>
                 <Button primary onClick={handleAddOptions} icon="add" content="Add Option" labelPosition="right"/>
@@ -128,7 +139,12 @@ const NormalQuestionComp = ({questionType,retrievedQuestion,index}) => {
                 <Button primary disabled={additionalInfo?true:false} onClick={handleAddAdditionalInfo} content="Add additional information" icon="add" labelPosition="right"/>
             </Form.Field>
             <Form.Field>
-               {additionalInfo ? <textarea value={additionalInfo} onChange={handleAdditionalText}/>:null} 
+               {additionalInfo ? 
+                    <SunEditor autoFocus={true}  setOptions={{
+                        buttonList : EDITOR_OPTIONS,
+                  }} onChange={(content) => handleAdditionalTextE(content) } setContents={additionalInfo} showToolbar={true} enableToolbar={true}/>
+                    :null
+                } 
             </Form.Field>
             <Button color="green" content='Save Question' icon='save' labelPosition='right'/>
         </Form>

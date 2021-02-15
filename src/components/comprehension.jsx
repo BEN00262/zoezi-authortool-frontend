@@ -1,29 +1,53 @@
-import React,{useState,useContext} from "react";
+import React,{useState} from "react";
 import SunEditor from 'suneditor-react';
-import {Button,Icon,Form,Checkbox,Header} from "semantic-ui-react";
+import {Button,Form,Checkbox,Header} from "semantic-ui-react";
 
-
+import Topic from './topic';
 import SCard from './SCard';
-import {PaperContext} from "../context/paperContext";
 
-const Comprehension = ({questionType,retrievedQuestion,index}) => {
-    const {addQuestion,authToken} = useContext(PaperContext);
+const COMPREHENSION_QUESTION = "comprehension";
+const EDITOR_OPTIONS = [
+    ['undo', 'redo', 'font', 'fontSize', 'formatBlock'],
+    ['bold', 'underline', 'italic', 'strike', 'subscript', 'superscript', 'removeFormat'],
+    ['fontColor', 'hiliteColor', 'outdent', 'indent', 'align', 'horizontalRule', 'list', 'table'],
+    ['image', 'fullScreen', 'showBlocks', 'preview']
+];
+
+const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index}) => {
     const [question,setQuestion] = useState(retrievedQuestion ? retrievedQuestion.question : "");
+    const [topic,setTopic] = useState(retrievedQuestion && retrievedQuestion.topic ? {
+        topic: retrievedQuestion.topic,
+        subTopic: retrievedQuestion.subTopic
+    } : {
+        topic:" ",
+        subTopic:" "
+    });
 
-   const [innerQuestion,setInnerQuestion] = useState(retrievedQuestion ? retrievedQuestion.children : []);
+   const [innerQuestion,setInnerQuestion] = useState(retrievedQuestion ? retrievedQuestion.children.map(({options,...rest})=> {
+        return {
+            ...rest,
+            options:options.map(({option,isCorrect}) => {
+                return {option,isCorrect}
+            })
+        }
+   }) : []);
 
    const saveQuestion = (e) => {
        e.preventDefault();
-       let nQues = {
-           questionType:retrievedQuestion ? retrievedQuestion.questionType :questionType,
+       let comprehension_question = {
+           questionType:COMPREHENSION_QUESTION,
            question,
            question_id: retrievedQuestion ? retrievedQuestion._id : null,
-           children:innerQuestion
+           children:innerQuestion,
+           topic: topic.topic,
+           subTopic: topic.subTopic,
        }
-       addQuestion(nQues,index,authToken);
+
+       saveQuestionToDatabase(comprehension_question,index);
    }
 
    const handleAddQuestion = (e) => {
+       e.preventDefault();
        setInnerQuestion([...innerQuestion,{
            question:"",
            additionalInfo:"",
@@ -31,14 +55,23 @@ const Comprehension = ({questionType,retrievedQuestion,index}) => {
        }]);
    }
 
-   const handleInnerQuestionInput = (e,index) => {
+//    const handleInnerQuestionInput = (e,index) => {
+//         let innerQues = [...innerQuestion];
+//         innerQues[index].question = e.target.value;
+//         setInnerQuestion(innerQues);
+//    }
+
+   const handleInnerQuestionInputE = (text,index) => {
         let innerQues = [...innerQuestion];
-        innerQues[index].question = e.target.value;
+        innerQues[index].question = text;
         setInnerQuestion(innerQues);
-   }
+    }
 
    const handleAddInnerQuestionOptions = (event,index) => {
+        event.preventDefault();
+
         let innerQues = [...innerQuestion];
+
         innerQues[index].options.push({
             option:"",
             isCorrect:false
@@ -47,13 +80,20 @@ const Comprehension = ({questionType,retrievedQuestion,index}) => {
         setInnerQuestion(innerQues);
    }
 
-   const handleAdditionalText = (event,index) => {
-        let innerQues = [...innerQuestion];
-        innerQues[index].additionalInfo = event.target.value;
-        setInnerQuestion(innerQues);
+//    const handleAdditionalText = (event,index) => {
+//         let innerQues = [...innerQuestion];
+//         innerQues[index].additionalInfo = event.target.value;
+//         setInnerQuestion(innerQues);
+//    }
+
+   const handleAdditionalTextE = (text,index) => {
+    let innerQues = [...innerQuestion];
+    innerQues[index].additionalInfo = text;
+    setInnerQuestion(innerQues);
    }
 
    const handleAddAdditionalInfo = (event,index) => {
+       event.preventDefault();
         let innerQues = [...innerQuestion];
         innerQues[index].additionalInfo = " ";
         setInnerQuestion(innerQues);
@@ -64,6 +104,13 @@ const Comprehension = ({questionType,retrievedQuestion,index}) => {
        innerQues.splice(index,1);
        setInnerQuestion(innerQues);
    }
+
+   const handleSetTopic = (e) => {
+        setTopic({
+            ...topic,
+            [e.target.name]:e.target.value
+        });
+    }
 
    const handleOptionSet = (parentIndex,index) => {
         // find the index of inner question then the index of the option and do it
@@ -90,8 +137,11 @@ const Comprehension = ({questionType,retrievedQuestion,index}) => {
 
     return (
         <Form onSubmit={saveQuestion}>
+            <Topic handleTopicAndSubject={handleSetTopic} topic={topic.topic} subtopic={topic.subTopic}/>
             <Form.Field>
-                <SunEditor  onChange={(content) => setQuestion(content) } setContents={question} enableToolbar={true}/>
+            <SunEditor autoFocus={true}  setOptions={{
+                      buttonList :EDITOR_OPTIONS,
+                }} onChange={(content) => setQuestion(content) } setContents={question} showToolbar={true} enableToolbar={true}/>
             </Form.Field>
 
             <Form.Field>
@@ -100,15 +150,18 @@ const Comprehension = ({questionType,retrievedQuestion,index}) => {
 
             {innerQuestion.map((iq,q_index) => {
                     return (
-                        <SCard>
+                        <SCard key={`innerQuestion_${q_index}`}>
                         <Header as='h4'>Sub question {q_index + 1}</Header>
                         <Form.Field key={`inner_ques_${q_index}`}>
                             <Form.Field>
-                                <Button color="red" onClick={(e) => removeInnerQuestion(q_index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
+                                <Button basic color="red" onClick={(e) => removeInnerQuestion(q_index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
                             </Form.Field>
                             
                             <Form.Field>
-                                <textarea onChange={(e) => handleInnerQuestionInput(e,q_index)} value={iq.question} type="text"/>
+                                {/* <textarea onChange={(e) => handleInnerQuestionInput(e,q_index)} value={iq.question} type="text"/> */}
+                                <SunEditor autoFocus={true}  setOptions={{
+                                    buttonList :EDITOR_OPTIONS,
+                              }} onChange={(content) => handleInnerQuestionInputE(content,q_index) } setContents={iq.question} showToolbar={true} enableToolbar={true}/>
                             </Form.Field>
 
                             <Form.Field>
@@ -125,9 +178,7 @@ const Comprehension = ({questionType,retrievedQuestion,index}) => {
                                                 <input onChange={(e) => handleOptionsInput(e,q_index,index)} value={option} type="text"/>
                                             </Form.Field>
 
-                                            <Button color="red" icon onClick={(e) => removeOption(q_index,index)}>
-                                                <Icon name="trash alternate outline"/>
-                                            </Button>
+                                            <Button basic color="red" icon="trash alternate outline" onClick={(e) => removeOption(q_index,index)}/>
                                         </Form.Group>
                                     </Form.Field>
                                 );
@@ -136,7 +187,11 @@ const Comprehension = ({questionType,retrievedQuestion,index}) => {
                                 <Button primary disabled={iq.additionalInfo?true:false} onClick={(e) => handleAddAdditionalInfo(e,q_index)} content="Add additional information" icon="add" labelPosition="right"/>
                             </Form.Field>
                             <Form.Field>
-                                {iq.additionalInfo ? <textarea value={iq.additionalInfo} onChange={(e) => handleAdditionalText(e,q_index)}/>:null} 
+                                {iq.additionalInfo ? 
+                                <SunEditor autoFocus={true}  setOptions={{
+                                    buttonList :EDITOR_OPTIONS,
+                              }} onChange={(content) => handleAdditionalTextE(content,q_index) } setContents={iq.additionalInfo} showToolbar={true} enableToolbar={true}/>
+                                :null} 
                             </Form.Field>
 
                         </Form.Field>

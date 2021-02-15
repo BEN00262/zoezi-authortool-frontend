@@ -1,6 +1,8 @@
 import 'semantic-ui-css/semantic.min.css'
 import {Container} from "semantic-ui-react";
 import {BrowserRouter,Route,Switch} from "react-router-dom";
+import ReactNotification from 'react-notifications-component'
+import 'react-notifications-component/dist/theme.css'
 
 import ContentPage from "./components/ContentPage";
 import PaperProvider from "./context/paperContext";
@@ -10,6 +12,7 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 function App() {
   return (
     <BrowserRouter>
+        <ReactNotification />
         <PaperProvider>
           <Container>
             <Switch>

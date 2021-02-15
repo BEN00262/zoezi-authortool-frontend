@@ -1,8 +1,8 @@
 import React,{useContext} from 'react';
-import {Grid,Divider} from "semantic-ui-react";
+import {Grid} from "semantic-ui-react";
 
 import SideBar from "./SideBar";
-import Paper from './paper';
+import PaperHOC from './paperhoc';
 
 import {PaperContext} from "../context/paperContext";
 
@@ -20,9 +20,8 @@ const ContentPage = () => {
                    
                 </Grid.Column>
 
-
                 <Grid.Column width={12}>
-                   {paperID ? <Paper/> : null} 
+                   {paperID ? <PaperHOC/> : null} 
                 </Grid.Column>
             </Grid.Row>
         </Grid>

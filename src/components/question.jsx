@@ -1,46 +1,80 @@
 import React,{useState,useContext} from "react";
-import {Form,Label,Segment} from "semantic-ui-react";
-import 'suneditor/dist/css/suneditor.min.css'; // Import Sun Editor's CSS File
+import {Form,Dropdown} from "semantic-ui-react";
+import 'suneditor/dist/css/suneditor.min.css';
 
 import SCard from './SCard';
 import NormalQuestionComp from "./normalQues";
 import Comprehension from "./comprehension";
 
-const QuestionComp = ({retrievedQuestion,index}) => {
-    const [questionType,setQuestionType] = useState(retrievedQuestion ? retrievedQuestion.questionType : "normal");
+import {PaperContext} from "../context/paperContext";
 
-    const handleQuestionTypeChange = (e) => {
-        setQuestionType(e.target.value);
+
+const NORMAL_QUESTION = "normal";
+const COMPREHENSION_QUESTION = "comprehension";
+
+const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
+    const [questionType,setQuestionType] = useState(retrievedQuestion ? retrievedQuestion.questionType : NORMAL_QUESTION);
+
+    const {authToken,paperID,createNotification,addQuestion} = useContext(PaperContext);
+
+    const handleQuestionTypeChange = (_,{ value }) => {
+        setQuestionType(value);
+    }
+
+    const saveQuestionToDatabase = (question,index) => {
+        question.paperID = paperID;
+
+        addQuestion(question,authToken)
+            .then(({data}) => {
+                if (data.success){
+                    updatePaperContent(data.question,index);
+                    createNotification("Success!!","success","Question created successfully");
+                }else{
+                    throw new Error("Failed to create/update question")
+                }
+            })
+            .catch(error => {
+                createNotification("Error!!","error",error.message);
+            })
+
     }
 
     const renderComp = (condition) => {
         switch(condition){
-            case 'normal':
-                return <NormalQuestionComp questionType={condition}/>
-            case "comprehension":
-                return <Comprehension questionType={condition}/>
+            case NORMAL_QUESTION:
+                return <NormalQuestionComp saveQuestionToDatabase={saveQuestionToDatabase}/>
+            case COMPREHENSION_QUESTION:
+                return <Comprehension saveQuestionToDatabase={saveQuestionToDatabase}/>
         }
     }
 
     const renderAllreadyFilled =  (question,index) => {
         switch(question.questionType){
-            case 'normal':
-                return <NormalQuestionComp retrievedQuestion={retrievedQuestion} index={index}/>
-            case "comprehension":
-                return <Comprehension retrievedQuestion={retrievedQuestion} index={index}/>
+            case NORMAL_QUESTION:
+                return <NormalQuestionComp saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
+            case COMPREHENSION_QUESTION:
+                return <Comprehension saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
         }
     }
+
+    const options = [
+        { key: 1, text: 'Normal', value: 'normal' },
+        { key: 2, text: 'Comprehension', value: 'comprehension' }
+    ]
 
     return (
         <SCard>
             <Form style={{marginBottom:"10px"}}>
                 <Form.Field>
-                    <label htmlFor="questionType">Select the question type</label>
+                    <Dropdown
+                        onChange={handleQuestionTypeChange}
+                        selection
+                        fluid
+                        defaultValue = {retrievedQuestion && retrievedQuestion.questionType ? retrievedQuestion.questionType : "normal"}
+                        options={options}
+                        placeholder='Choose Question Type'
+                    />
 
-                    <select id="questionType" value={questionType} onChange={handleQuestionTypeChange}>
-                        <option value="normal">normal</option>
-                        <option value="comprehension">comprehension</option>
-                    </select>
                 </Form.Field>
             </Form>
             
