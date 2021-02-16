@@ -82,6 +82,13 @@ const PaperProvider = ({children}) => {
             })
     }
 
+    const isSubmittedDispatch = (condition) => {
+        dispatch({
+            type: "UPDATE_IS_SUBMITTED",
+            payload: condition
+        })
+    }
+
     const removeQuestionDispatch = (questionId,token) => {
         return axios.delete(`/remove-question/${questionId}`,{
             headers:{
@@ -196,6 +203,7 @@ const PaperProvider = ({children}) => {
             createPaperDispatch,
             fetchPapers,
             fetchQuestions,
+            isSubmittedDispatch,
             addQuestion,
             addQuestionDispatch,
             removeQuestionDispatch,

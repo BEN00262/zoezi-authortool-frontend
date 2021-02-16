@@ -15,7 +15,7 @@ const COMPREHENSION_QUESTION = "comprehension";
 const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
     const [questionType,setQuestionType] = useState(retrievedQuestion ? retrievedQuestion.questionType : NORMAL_QUESTION);
 
-    const {authToken,paperID,createNotification,addQuestion} = useContext(PaperContext);
+    const {authToken,paperID,isSubmitted,createNotification,addQuestion} = useContext(PaperContext);
 
     const handleQuestionTypeChange = (_,{ value }) => {
         setQuestionType(value);
@@ -51,9 +51,9 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
     const renderAllreadyFilled =  (question,index) => {
         switch(question.questionType){
             case NORMAL_QUESTION:
-                return <NormalQuestionComp saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
+                return <NormalQuestionComp isSubmitted={isSubmitted} saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
             case COMPREHENSION_QUESTION:
-                return <Comprehension saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
+                return <Comprehension isSubmitted={isSubmitted} saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
         }
     }
 
@@ -67,6 +67,7 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
             <Form style={{marginBottom:"10px"}}>
                 <Form.Field>
                     <Dropdown
+                        disabled={isSubmitted}
                         onChange={handleQuestionTypeChange}
                         selection
                         fluid

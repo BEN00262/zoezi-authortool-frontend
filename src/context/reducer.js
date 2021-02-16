@@ -17,6 +17,10 @@ const reducer = (state,action) => {
             return produce(state,newState => {
                 newState.currentQuestions[action.payload.index] = action.payload.data;
             })
+        case "UPDATE_IS_SUBMITTED":
+            return produce(state,draft => {
+                draft.isSubmitted = action.payload;
+            })
         case "REMOVE_QUESTION":
             return produce(state,newState => {
                 newState.currentQuestions.splice(action.payload.index,1);

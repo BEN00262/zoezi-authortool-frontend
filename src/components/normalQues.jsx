@@ -13,7 +13,7 @@ const EDITOR_OPTIONS = [
 ];
 
 // use the index to change the question's content on save or updating
-const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index}) => {
+const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index,isSubmitted = false}) => {
     const [question,setQuestion] = useState("");
     const [topic,setTopic] = useState({
         topic:" ",
@@ -113,7 +113,7 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
                 }} onChange={(content) => setQuestion(content) } setContents={question} showToolbar={true} enableToolbar={true}/>
             </Form.Field>
             <Form.Field>
-                <Button primary onClick={handleAddOptions} icon="add" content="Add Option" labelPosition="right"/>
+                <Button primary disabled={isSubmitted} onClick={handleAddOptions} icon="add" content="Add Option" labelPosition="right"/>
             </Form.Field>
             
                 {options.map((foundOption,index) => {
@@ -121,13 +121,13 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
                         <Form.Field key={`option_${index}`}>
                             <Form.Group widths="1" inline>
                                 <Form.Field>
-                                    <Checkbox defaultChecked={retrievedQuestion && foundOption.isCorrect ? true : false} onClick={(e) => onOptionSet(index)}/>
+                                    <Checkbox disabled={isSubmitted} defaultChecked={retrievedQuestion && foundOption.isCorrect ? true : false} onClick={(e) => onOptionSet(index)}/>
                                 </Form.Field>
                                 <Form.Field>
                                     <input value={retrievedQuestion ? foundOption.option : null} onChange={(e) => handleOptionsInput(e,index)} type="text"/>
                                 </Form.Field>
 
-                                <Button basic color="red" icon onClick={(e) => removeOption(e,index)}>
+                                <Button basic color="red" disabled={isSubmitted} icon onClick={(e) => removeOption(e,index)}>
                                     <Icon name="trash alternate outline"/>
                                 </Button>
                             </Form.Group>
@@ -136,7 +136,7 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
                 })}
             
             <Form.Field>
-                <Button primary disabled={additionalInfo?true:false} onClick={handleAddAdditionalInfo} content="Add additional information" icon="add" labelPosition="right"/>
+                <Button primary disabled={(additionalInfo?true:false) || isSubmitted } onClick={handleAddAdditionalInfo} content="Add additional information" icon="add" labelPosition="right"/>
             </Form.Field>
             <Form.Field>
                {additionalInfo ? 
@@ -146,7 +146,7 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
                     :null
                 } 
             </Form.Field>
-            <Button color="green" content='Save Question' icon='save' labelPosition='right'/>
+            <Button color="green" content='Save Question' disabled={isSubmitted} icon='save' labelPosition='right'/>
         </Form>
         </>
     );

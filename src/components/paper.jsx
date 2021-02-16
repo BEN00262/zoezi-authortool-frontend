@@ -1,6 +1,7 @@
 import React,{useState,useContext,useEffect} from "react";
 import {Button,Header,Transition,Segment,Label} from "semantic-ui-react";
 import {motion} from 'framer-motion';
+import { io } from "socket.io-client";
 
 import QuestionComp from "./question";
 import {PaperContext} from "../context/paperContext";
@@ -10,26 +11,28 @@ const CAN_REVIEW = "can:review";
 
 
 // first we will fetch the already created questions from the database and then enable the use to create questions
-const Paper = ({fetched_questions=[],is_submitted = false}) => {
+const Paper = ({fetched_questions=[]}) => {
     const {authToken
         ,createNotification
         ,paperID
+        ,isSubmittedDispatch
+        ,isSubmitted
         ,submitPaperDispatch
         ,approveQuestionDispatch
         ,removeQuestionDispatch
         ,fetchPapers
         ,roles} = useContext(PaperContext);
 
-    const check_role = (role_required) => {
-        return roles.includes(role_required);
-    }
-
-    const [isHidden,setIsHidden] = useState([]);
-    const [paperQuestions,setPaperQuestions] = useState(fetched_questions);
+    const check_role = (role_required) => roles.includes(role_required);
     
-    // useEffect(() => {
-    //     fetchPapers(authToken);
-    // },[]);
+    const [isHidden,setIsHidden] = useState(new Array(fetched_questions.length).fill(true));
+    const [paperQuestions,setPaperQuestions] = useState(fetched_questions);
+    const [is_submitted,setIsSubmitted] = useState(isSubmitted);
+
+    // check this
+    useEffect(() => {
+
+    },[isSubmitted]);
 
     const updatePaperContent = (new_question,index) => {
         let local_paper_copy = [...paperQuestions];
@@ -39,7 +42,7 @@ const Paper = ({fetched_questions=[],is_submitted = false}) => {
 
 
     const addQuestion = (e) => {
-        setPaperQuestions([...paperQuestions,null])
+        setPaperQuestions([...paperQuestions,null]);
     }
 
     const removeQuestion = (questionId,index) => {
@@ -50,7 +53,6 @@ const Paper = ({fetched_questions=[],is_submitted = false}) => {
 
         let cleanUpFunc = () => {
             paperQuestionsCopy.splice(index,1);
-            // console.log(paperQuestionsCopy);
             setPaperQuestions(paperQuestionsCopy);
             createNotification("Success!","success","Question removed successfully");
         }
@@ -68,17 +70,48 @@ const Paper = ({fetched_questions=[],is_submitted = false}) => {
         }
     }
 
+    const updateQuestionsState = (status,index) => {
+        let paperQuestionsCopy = [...paperQuestions];
+        let question_object = paperQuestionsCopy[index];
+        question_object.status = status;
+        setPaperQuestions([...paperQuestionsCopy]);
+    }
+
+    const runJobs = () => {
+        const socket = io("http://localhost:3500/"); // start the connection here
+        socket.emit("runTest",paperID);
+        socket.on("results",results => {
+            console.log(results);
+        });
+
+        socket.on("error",result => {
+            console.log(result);
+        })
+        
+        socket.on("finished",results => {
+            console.log("finished");
+            socket.disconnect();
+        })
+    }
+
+    // we need to update`
     const submitForReviewAction = () => {
-        submitPaperDispatch(paperID)
+        submitPaperDispatch(paperID,authToken)
             .then(({data}) => {
                 if(data.success){
-                    createNotification("Success!","success","Paper Successfully submitted");
+                    createNotification("Success!","success","Paper Submitted Successfully!!");
+                    setIsSubmitted(true); // this seems to be stupid --> remove this
+                    isSubmittedDispatch(true); // dipatch the isSubmitted stuff
                     fetchPapers(authToken);
+
+                    runJobs(); // this should actually run before --> if any stuff is false we do not submit the paper
+
                 }else{
                     throw new Error("Failed to submit paper for review");
                 }
             })
             .catch(error => {
+                console.log(error);
                 createNotification("Error!","error",error.message);
             })
     }
@@ -87,10 +120,11 @@ const Paper = ({fetched_questions=[],is_submitted = false}) => {
         approveQuestionDispatch(id,index,authToken)
             .then(({data}) => {
                 if(data.success){
-                    let paperQuestionsCopy = [...paperQuestions];
-                    let question_object = paperQuestionsCopy[index];
-                    question_object.status = "approved";
-                    setPaperQuestions([...paperQuestionsCopy]);
+                    // let paperQuestionsCopy = [...paperQuestions];
+                    // let question_object = paperQuestionsCopy[index];
+                    // question_object.status = "approved";
+                    // setPaperQuestions([...paperQuestionsCopy]);
+                    updateQuestionsState("approved",index)
                 }else{
                     throw new Error("Failed to approve question");
                 }
@@ -102,6 +136,7 @@ const Paper = ({fetched_questions=[],is_submitted = false}) => {
 
     // a question should manage this for christ sake
     const toggleQuestionVisibility = (index) => {
+        // find a better way to handle this
         let clone_state = [...isHidden];
         clone_state[index] = clone_state[index] ? !clone_state[index] : true;
         setIsHidden(clone_state)
@@ -125,7 +160,7 @@ const Paper = ({fetched_questions=[],is_submitted = false}) => {
             </div>
 
             
-            <div style={{height:"100vh", overflowY:"scroll", marginTop:"10px", paddingRight:"10px", paddingLeft:"10px"}} >
+            <div style={{height:"85vh", overflowY:"scroll", marginTop:"10px", paddingRight:"10px", paddingLeft:"10px"}} >
                 {paperQuestions.map((retrievedQuestion,index) => {
                     return (
                         <React.Fragment key={`question_${index}`}>
@@ -148,7 +183,7 @@ const Paper = ({fetched_questions=[],is_submitted = false}) => {
                                             content="Approve" icon="thumbs up alternate outline" labelPosition="right"/> : null
                                     }
                                         
-                                        <Button basic color="red" onClick={(e) => removeQuestion(retrievedQuestion ? retrievedQuestion._id:null,index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
+                                        <Button basic color="red" disabled={isSubmitted} onClick={(e) => removeQuestion(retrievedQuestion ? retrievedQuestion._id:null,index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
                                     
                                     </Segment>
                                 </Segment.Group>
