@@ -79,10 +79,6 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
         setAdditionalInfo(" ");
     }
 
-    // const handleAdditionalText = (e) => {
-    //     setAdditionalInfo(e.target.value);
-    // }
-
     const handleAdditionalTextE = (text) => {
         setAdditionalInfo(text);
     }
@@ -94,7 +90,7 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
             questionType: QUESTION_TYPE,
             question_id: retrievedQuestion ? retrievedQuestion._id : null,
             question,
-            options,
+            options_next:options,
             topic: topic.topic,
             subTopic: topic.subTopic,
             additionalInfo:additionalInfo ? additionalInfo : ""

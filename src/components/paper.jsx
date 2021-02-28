@@ -78,7 +78,7 @@ const Paper = ({fetched_questions=[]}) => {
     }
 
     const runJobs = () => {
-        const socket = io("http://localhost:3500/"); // start the connection here
+        const socket = io("https://sleepy-lake-97311.herokuapp.com/");//"http://localhost:3500/"); // start the connection here
         socket.emit("runTest",paperID);
         socket.on("results",results => {
             console.log(results);
@@ -112,7 +112,7 @@ const Paper = ({fetched_questions=[]}) => {
             })
             .catch(error => {
                 console.log(error);
-                createNotification("Error!","error",error.message);
+                createNotification("Error!","danger",error.message);
             })
     }
 
@@ -130,7 +130,7 @@ const Paper = ({fetched_questions=[]}) => {
                 }
             })
             .catch(error => {
-                createNotification("Error!","error",error.message);
+                createNotification("Error!","danger",error.message);
             });
     }
 

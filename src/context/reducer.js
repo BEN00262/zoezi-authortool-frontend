@@ -3,6 +3,7 @@ import produce from "immer";
 
 const reducer = (state,action) => {
     switch(action.type){
+        //  remove this one am sure it is not used anywhere but kidogo tu
         case "APPROVE_QUESTION":{
             let localState = {...state,currentQuestions:[...state.currentQuestions]};
             localState.currentQuestions[action.payload.index] = action.payload.data;
@@ -43,6 +44,12 @@ const reducer = (state,action) => {
                     newState.papers[paper.paperType].papers.push({name:paper.paperName,id:paper._id})
                })
             })
+        case "CHANGE_CURRENT_PAPER_DETAILS":
+            return {
+                ...state,
+                paperGrade: action.payload.grade,
+                paperSubject: action.payload.subject
+            }
         case "CHANGE_PAPER_ID":
             let myLocalState = {...state}
             myLocalState.paperID = action.payload.paperID;
@@ -53,6 +60,10 @@ const reducer = (state,action) => {
 
             localState.paperID = action.payload._id;
             localState.paperName = action.payload.paperName;
+
+            // we also have information about the grade and subject accessed --> use this for our own good SMH!!
+            localState.paperGrade = action.payload.grade;
+            localState.paperSubject = action.payload.subject;
             
             if(!localState.papers[action.payload.paperType]){
                 localState.papers[action.payload.paperType] = { papers:[] };

@@ -15,7 +15,7 @@ const COMPREHENSION_QUESTION = "comprehension";
 const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
     const [questionType,setQuestionType] = useState(retrievedQuestion ? retrievedQuestion.questionType : NORMAL_QUESTION);
 
-    const {authToken,paperID,isSubmitted,createNotification,addQuestion} = useContext(PaperContext);
+    const {authToken,paperID,isSubmitted,createNotification,addQuestion,paperGrade, paperSubject} = useContext(PaperContext);
 
     const handleQuestionTypeChange = (_,{ value }) => {
         setQuestionType(value);
@@ -24,7 +24,11 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
     const saveQuestionToDatabase = (question,index) => {
         question.paperID = paperID;
 
-        addQuestion(question,authToken)
+        addQuestion({
+            ...question,
+            paperGrade,
+            paperSubject
+        },authToken)
             .then(({data}) => {
                 if (data.success){
                     updatePaperContent(data.question,index);
@@ -34,7 +38,7 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
                 }
             })
             .catch(error => {
-                createNotification("Error!!","error",error.message);
+                createNotification("Error!!","danger",error.message);
             })
 
     }

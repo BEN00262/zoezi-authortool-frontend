@@ -19,7 +19,7 @@ const verifyToken = () => {
     }
 }
 
-axios.defaults.baseURL = 'http://localhost:3500';
+axios.defaults.baseURL = 'http://localhost:3500'; // 'https://sleepy-lake-97311.herokuapp.com/';
 
 // first fetch the token from the localstorage if it exists
 
@@ -29,6 +29,8 @@ let initialContext = {
     isSubmitted:false,
     paperID:"",
     paperName:"",
+    paperGrade:"",
+    paperSubject:"",
     currentQuestions:[],
     papers:{},
 };
@@ -39,10 +41,6 @@ const PaperProvider = ({children}) => {
     const [state,dispatch] = useReducer(reducer,initialContext);
 
     const createNotification = (notificationTitle,notificationType,notificationMessage) => {
-        console.log(notificationMessage);
-        console.log(notificationTitle);
-        console.log(notificationType);
-
         store.addNotification({
             title: notificationTitle,
             message: notificationMessage,
@@ -61,6 +59,7 @@ const PaperProvider = ({children}) => {
     const loginDispatch = (loginCreds) => {
         axios.post("/user/login",loginCreds)
             .then(({data}) => {
+                console.log(data);
                 if(data.success){
                     localStorage.setItem("authToken",data.token);
                     localStorage.setItem("roles",data.roles);
@@ -78,10 +77,19 @@ const PaperProvider = ({children}) => {
                 }
             })
             .catch(error =>{
-                createNotification("Error!","error",error.message);
+                createNotification("Error!","danger",error.message);
             })
     }
 
+    const updatePaperDetails = (details) => {
+        dispatch({
+            type: "CHANGE_CURRENT_PAPER_DETAILS",
+            payload: {
+                grade: details.grade,
+                subject: details.subject
+            }
+        })
+    }
     const isSubmittedDispatch = (condition) => {
         dispatch({
             type: "UPDATE_IS_SUBMITTED",
@@ -139,8 +147,7 @@ const PaperProvider = ({children}) => {
                 }
             })
         .catch(error => {
-            console.log(error);
-            // createNotification("Error!","error",error.message);
+            createNotification("Error!","danger",error.message);
         })
     }
 
@@ -166,7 +173,7 @@ const PaperProvider = ({children}) => {
             })
             .catch(error => {
                 console.log(error);
-                createNotification("Error!","error",error.message);
+                createNotification("Error!","danger",error.message);
             })
     }
 
@@ -199,6 +206,9 @@ const PaperProvider = ({children}) => {
             paperID:state.paperID,
             papers:state.papers,
             authToken:state.authToken,
+            paperGrade: state.paperGrade,
+            paperSubject: state.paperSubject,
+            updatePaperDetails,
             changePaperID,
             createPaperDispatch,
             fetchPapers,

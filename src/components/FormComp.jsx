@@ -21,8 +21,6 @@ const FormComp = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-
-        console.log(loginData);
         loginDispatch(loginData);
     }
 

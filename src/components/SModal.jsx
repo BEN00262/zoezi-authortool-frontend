@@ -1,37 +1,78 @@
-import React,{useState} from "react";
+import React,{useState,useEffect,useContext} from "react";
 import { Button, Form, Modal,Dropdown } from 'semantic-ui-react';
-
-const options = [
-  { key: 1, text: 'One', value: "one" },
-  { key: 2, text: 'Two', value: "two" },
-  { key: 3, text: 'KCPE', value: "kcpe" },
-]
-
-const DEFAULT_GRADE = "one";
+import axios from 'axios';
+import { PaperContext } from '../context/paperContext';
 
 const SModal = ({createPaper}) => {
-    const [open, setOpen] = useState(false)
+    const { authToken,createNotification } = useContext(PaperContext);
+    const [open, setOpen] = useState(false);
+
+    const [gradeSelection,setGradeSelection] = useState([]);
+    const [subjectSelection,setSubjectSelection] = useState({});
+    const [paperTypeSelection,setPaperTypeSelection] = useState([]);
+    const [displaySubjects,setDisplaySubjects] = useState([]);
     
     const [paper,setPaper] = useState({
-        grade:DEFAULT_GRADE,
+        grade:"",
         subject:"",
         paperType:""
-    })
+    });
+
+    useEffect(() => {
+      axios.get("/user/metadata",{
+        headers:{
+            AuthToken:authToken
+        }
+      })
+        .then(({ data }) => {
+          let paperTypesFetched = data.paperTypeCanDo.map((x,index) => {
+            return { key: `${x.replaceAll(" ","")}_${index}`, text: x, value: x }
+          })
+
+          setPaperTypeSelection(paperTypesFetched);
+
+          let gradesFetched = data.contentCanDo.map((x,index) => ({ key: `${x.grade}_${index}`, text: x.grade, value: x.grade}));
+          setGradeSelection(gradesFetched);
+
+          let subjectsMapping = data.contentCanDo.reduce((acc,current) => {
+            acc[current.grade] = current.subjects.map((x,index) => ({key: `${x.replaceAll(" ","")}_${index}`, text: x, value: x}));
+            return acc;
+          },{});
+
+          setSubjectSelection(subjectsMapping);
+        })
+        .catch(error => {
+          setOpen(false);
+          createNotification("Error!","danger",error.message);
+        })
+
+    },[]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
         createPaper(paper);
         setOpen(false);
     }
-
-    const handleInputChange = (e) => {
-        setPaper({...paper,[e.target.name]:e.target.value});
-    }
     
     const handleGradeSelection = (_,{ value }) => {
         setPaper({
           ...paper,
           grade:value
+        });
+        setDisplaySubjects(subjectSelection[value]);
+    }
+
+    const handleSubjectSelection = (_,{ value }) => {
+        setPaper({
+          ...paper,
+          subject:value
+        });
+    }
+
+    const handlePaperTypeSelection = (_,{ value }) => {
+        setPaper({
+          ...paper,
+          paperType:value
         });
     }
 
@@ -57,18 +98,29 @@ const SModal = ({createPaper}) => {
                         onChange={handleGradeSelection}
                         selection
                         fluid
-                        defaultValue = {DEFAULT_GRADE}
-                        options={options}
+                        options={gradeSelection}
                         placeholder='Select Grade'
                     />
             </Form.Field>
             <Form.Field>
                 <label>Subject</label>
-                <input placeholder='Subject' name="subject" onChange={handleInputChange} />
+                <Dropdown
+                        onChange={handleSubjectSelection}
+                        selection
+                        fluid
+                        options={displaySubjects}
+                        placeholder='Select Subject'
+                    />
             </Form.Field>
             <Form.Field>
                 <label>Paper Type</label>
-                <input placeholder='Paper Type' name="paperType" onChange={handleInputChange}/>
+                <Dropdown
+                        onChange={handlePaperTypeSelection}
+                        selection
+                        fluid
+                        options={paperTypeSelection}
+                        placeholder='Select Paper Type'
+                    />
             </Form.Field> 
         </Form>
         </Modal.Content>

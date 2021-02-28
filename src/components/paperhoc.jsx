@@ -7,7 +7,12 @@ import { useState } from 'react';
 
 
 const PaperHOC = () => {
-    const { paperID,fetchQuestions,authToken,isSubmittedDispatch } = useContext(PaperContext);
+    const { 
+        paperID,fetchQuestions,
+        authToken,isSubmittedDispatch,
+        updatePaperDetails 
+    } = useContext(PaperContext);
+    
     const [fetchedQuestions,setFetchedQuestions] = useState([]);
     const [isLoading,setIsLoading] = useState(false);
     const [error,setError] = useState(null);
@@ -18,6 +23,11 @@ const PaperHOC = () => {
             .then(({data}) => {
                 setFetchedQuestions(data);
                 isSubmittedDispatch(data.isSubmitted);
+
+                updatePaperDetails({
+                    grade: data.grade,
+                    subject: data.subject
+                });
             })
             .catch(error => {
                 console.log(error);
