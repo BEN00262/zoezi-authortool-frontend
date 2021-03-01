@@ -19,7 +19,7 @@ const verifyToken = () => {
     }
 }
 
-axios.defaults.baseURL = 'http://localhost:3500'; // 'https://sleepy-lake-97311.herokuapp.com/';
+axios.defaults.baseURL = 'https://sleepy-lake-97311.herokuapp.com/';// C:\Users\USER\benFiles\ben\zoezi\mockEntryTool\restserver\zoezi-entry-tool
 
 // first fetch the token from the localstorage if it exists
 

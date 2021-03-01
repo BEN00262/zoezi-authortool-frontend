@@ -55,12 +55,6 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
        }]);
    }
 
-//    const handleInnerQuestionInput = (e,index) => {
-//         let innerQues = [...innerQuestion];
-//         innerQues[index].question = e.target.value;
-//         setInnerQuestion(innerQues);
-//    }
-
    const handleInnerQuestionInputE = (text,index) => {
         let innerQues = [...innerQuestion];
         innerQues[index].question = text;
@@ -79,12 +73,6 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
 
         setInnerQuestion(innerQues);
    }
-
-//    const handleAdditionalText = (event,index) => {
-//         let innerQues = [...innerQuestion];
-//         innerQues[index].additionalInfo = event.target.value;
-//         setInnerQuestion(innerQues);
-//    }
 
    const handleAdditionalTextE = (text,index) => {
     let innerQues = [...innerQuestion];

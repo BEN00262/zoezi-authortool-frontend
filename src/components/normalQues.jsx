@@ -24,7 +24,7 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
 
     useEffect(() => {
         let initialQuestion = retrievedQuestion && retrievedQuestion.question ? retrievedQuestion.question : "";    
-        let initialOptions = retrievedQuestion && retrievedQuestion.options ?retrievedQuestion.options.map(({option,isCorrect}) => {
+        let initialOptions = retrievedQuestion && retrievedQuestion.options_next ?retrievedQuestion.options_next.map(({option,isCorrect}) => {
             return {option,isCorrect};
         })  : [];
         let initialAdditional = retrievedQuestion && retrievedQuestion.additionalInfo ? retrievedQuestion.additionalInfo : "";
