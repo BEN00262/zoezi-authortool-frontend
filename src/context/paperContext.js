@@ -1,28 +1,41 @@
 import React,{createContext,useReducer} from "react";
 import { store } from 'react-notifications-component';
-import reducer from "./reducer";
 import axios from "axios";
 import jwt_decode from "jwt-decode";
+import { io } from "socket.io-client";
+
+import {
+    SET_SOCKETIO_ID,
+    INVALIDATE_SOCKETIO_ID,
+    SET_LOGIN_TOKEN,
+    UNSET_LOGIN_TOKEN,
+    UPDATE_IS_SUBMITTED,
+    FETCH_PAPERS,
+    CHANGE_CURRENT_PAPER_DETAILS,
+    CHANGE_PAPER_ID,
+    CREATE_PAPER
+} from './actionTypes';
+import reducer from "./reducer";
 
 const verifyToken = () => {
     const token = localStorage.getItem("authToken");
     try{
         const { exp } = jwt_decode(token);
-
         if (Date.now() >= exp * 1000) {
             return null;
         }
-
         return token;
     }catch(error) {
         return null;
     }
 }
 
-axios.defaults.baseURL = 'https://sleepy-lake-97311.herokuapp.com/';// C:\Users\USER\benFiles\ben\zoezi\mockEntryTool\restserver\zoezi-entry-tool
+// https://sleepy-lake-97311.herokuapp.com/
+axios.defaults.baseURL = 'http://localhost:3500/';
+const socketIO = io("http://localhost:3600/");
 
-// first fetch the token from the localstorage if it exists
-
+// we should also pass the roles in the token --> for security
+// rather than the way we are handling it now
 let initialContext = {
     authToken:verifyToken(),
     roles:localStorage.getItem("roles") ? localStorage.getItem("roles").split(",") : [],
@@ -33,12 +46,27 @@ let initialContext = {
     paperSubject:"",
     currentQuestions:[],
     papers:{},
+    socket_io_id: null
 };
 
 export const PaperContext = createContext(initialContext);
 
 const PaperProvider = ({children}) => {
     const [state,dispatch] = useReducer(reducer,initialContext);
+
+    socketIO.on('connect', () => {
+        console.log(socketIO.id);
+        dispatch({
+            type: SET_SOCKETIO_ID,
+            payload: socketIO.id
+        })
+    })
+    
+    socketIO.on('disconnect',() => {
+        dispatch({
+            type: INVALIDATE_SOCKETIO_ID,
+        })
+    })
 
     const createNotification = (notificationTitle,notificationType,notificationMessage) => {
         store.addNotification({
@@ -56,15 +84,20 @@ const PaperProvider = ({children}) => {
           });
     }
 
+    const logoutDispatcher = () => {
+        dispatch({
+            type: UNSET_LOGIN_TOKEN
+        });
+    }
+
     const loginDispatch = (loginCreds) => {
         axios.post("/user/login",loginCreds)
             .then(({data}) => {
-                console.log(data);
                 if(data.success){
                     localStorage.setItem("authToken",data.token);
                     localStorage.setItem("roles",data.roles);
                     dispatch({
-                        type: "SET_LOGIN_TOKEN",
+                        type: SET_LOGIN_TOKEN,
                         payload: {
                             token:data.token,
                             roles:data.roles
@@ -83,7 +116,7 @@ const PaperProvider = ({children}) => {
 
     const updatePaperDetails = (details) => {
         dispatch({
-            type: "CHANGE_CURRENT_PAPER_DETAILS",
+            type: CHANGE_CURRENT_PAPER_DETAILS,
             payload: {
                 grade: details.grade,
                 subject: details.subject
@@ -92,7 +125,7 @@ const PaperProvider = ({children}) => {
     }
     const isSubmittedDispatch = (condition) => {
         dispatch({
-            type: "UPDATE_IS_SUBMITTED",
+            type: UPDATE_IS_SUBMITTED,
             payload: condition
         })
     }
@@ -123,7 +156,7 @@ const PaperProvider = ({children}) => {
 
     const changePaperID = (paperID) => {
         dispatch({
-            type:"CHANGE_PAPER_ID",
+            type:CHANGE_PAPER_ID,
             payload:{
                 paperID
             }
@@ -139,7 +172,7 @@ const PaperProvider = ({children}) => {
         .then(({data}) => {
                 if(data){
                     dispatch({
-                        type:"FETCH_PAPERS",
+                        type:FETCH_PAPERS,
                         payload:data
                     })
                 }else{
@@ -160,32 +193,25 @@ const PaperProvider = ({children}) => {
             .then(({data}) => {
                 if(data.success){
                     dispatch({
-                        type:"CREATE_PAPER",
+                        type:CREATE_PAPER,
                         payload:data.paper
                     });
                     createNotification("Success!","success","Paper created successfully");
                 }else{
-                    console.log(data)
                     data.errors.forEach(error => {
                         createNotification("Error!","error",error);
                     })
                 }
             })
             .catch(error => {
-                console.log(error);
                 createNotification("Error!","danger",error.message);
             })
     }
 
-    const addQuestionDispatch = () => {
-        dispatch({
-            type:"ADD_QUESTION_TO_STACK"
-        })
-    }
-
-    const submitPaperDispatch = (paperID,token) => {
+    const submitPaperDispatch = (clientID,paperID,token) => {
         return axios.post("/submit-paper",{
-            paperID
+            paperID,
+            clientID
         },{
             headers:{
                 AuthToken:token
@@ -215,15 +241,17 @@ const PaperProvider = ({children}) => {
             fetchQuestions,
             isSubmittedDispatch,
             addQuestion,
-            addQuestionDispatch,
             removeQuestionDispatch,
             loginDispatch,
             approveQuestionDispatch,
             submitPaperDispatch,
             createNotification,
+            logoutDispatcher,
             roles: state.roles,
             isSubmitted:state.isSubmitted,
             currentQuestions:state.currentQuestions,
+            socketIO,
+            socket_io_id: state.socket_io_id
         }}>
             {children}
         </PaperContext.Provider>

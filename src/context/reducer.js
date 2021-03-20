@@ -1,38 +1,42 @@
 import produce from "immer";
+import {
+    SET_SOCKETIO_ID,
+    INVALIDATE_SOCKETIO_ID,
+    SET_LOGIN_TOKEN,
+    UPDATE_IS_SUBMITTED,
+    FETCH_PAPERS,
+    CHANGE_CURRENT_PAPER_DETAILS,
+    CHANGE_PAPER_ID,
+    CREATE_PAPER,
+    UNSET_LOGIN_TOKEN
+} from './actionTypes';
 
-
+// update this file later 
 const reducer = (state,action) => {
     switch(action.type){
-        //  remove this one am sure it is not used anywhere but kidogo tu
-        case "APPROVE_QUESTION":{
-            let localState = {...state,currentQuestions:[...state.currentQuestions]};
-            localState.currentQuestions[action.payload.index] = action.payload.data;
-            return localState;
-        }
-        case "SET_LOGIN_TOKEN":
+        case SET_SOCKETIO_ID:
+            return produce(state,newState => {
+                newState.socket_io_id = action.payload;
+            })
+        case INVALIDATE_SOCKETIO_ID:
+            return produce(state,newState => {
+                newState.socket_io_id = null;
+            })
+        case SET_LOGIN_TOKEN:
             return produce(state,newState => {
                 newState.authToken = action.payload.token;
                 newState.roles = action.payload.roles;
             })
-        case "UPDATE_QUESTION":
+        case UNSET_LOGIN_TOKEN:
             return produce(state,newState => {
-                newState.currentQuestions[action.payload.index] = action.payload.data;
+                newState.authToken = null;
+                newState.roles = null;
             })
-        case "UPDATE_IS_SUBMITTED":
+        case UPDATE_IS_SUBMITTED:
             return produce(state,draft => {
                 draft.isSubmitted = action.payload;
             })
-        case "REMOVE_QUESTION":
-            return produce(state,newState => {
-                newState.currentQuestions.splice(action.payload.index,1);
-            })
-        case "ADD_QUESTION_TO_STACK":
-            // improve on this
-            return {
-                ...state,
-                currentQuestions:[...state.currentQuestions,null]
-            }
-        case "FETCH_PAPERS":
+        case FETCH_PAPERS:
             return produce(state, newState => {
                newState.papers = [];
                action.payload.forEach(paper => {
@@ -44,24 +48,23 @@ const reducer = (state,action) => {
                     newState.papers[paper.paperType].papers.push({name:paper.paperName,id:paper._id})
                })
             })
-        case "CHANGE_CURRENT_PAPER_DETAILS":
+        case CHANGE_CURRENT_PAPER_DETAILS:
             return {
                 ...state,
                 paperGrade: action.payload.grade,
                 paperSubject: action.payload.subject
             }
-        case "CHANGE_PAPER_ID":
+        case CHANGE_PAPER_ID:
             let myLocalState = {...state}
             myLocalState.paperID = action.payload.paperID;
             return myLocalState;
 
-        case "CREATE_PAPER":
+        case CREATE_PAPER:
             let localState = {...state,papers:{...state.papers}};
 
             localState.paperID = action.payload._id;
             localState.paperName = action.payload.paperName;
 
-            // we also have information about the grade and subject accessed --> use this for our own good SMH!!
             localState.paperGrade = action.payload.grade;
             localState.paperSubject = action.payload.subject;
             
