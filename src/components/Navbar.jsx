@@ -1,10 +1,11 @@
 import React, {useContext} from 'react'
-import { Button, Menu } from 'semantic-ui-react';
-import {Redirect} from "react-router-dom";
+import { Button, Menu,Icon, Label } from 'semantic-ui-react';
+import {Redirect, withRouter } from "react-router-dom";
 
 import { PaperContext } from '../context/paperContext';
+import AdminFavi from '../images/adminfavi.jpg';
 
-const Navbar = () => {
+const Navbar = (props) => {
     const { logoutDispatcher } = useContext(PaperContext);
 
     const signOut = () => {
@@ -12,9 +13,34 @@ const Navbar = () => {
         return <Redirect to="/"/>
     }
 
+    const navigateHome = () => {
+      return props.history.push('/dashboard'); 
+    }
+
+    const navigateNotifications = () => {
+      return props.history.push('/notifications'); 
+    }
+
+    const navigateToAnalytics = () => {
+      return props.history.push('/analytics')
+    }
+
     return (
       <Menu size='small' style={{marginTop:"5px"}}>
+        <Menu.Item header onClick={navigateHome}>
+          <img src={AdminFavi} />
+        </Menu.Item>
         <Menu.Menu position='right'>
+          <Menu.Item
+            name="My Panel"
+            onClick={navigateToAnalytics}
+          />
+          <Menu.Item onClick={navigateNotifications}>
+            <Icon name='bell' /> Notifications
+            <Label color='teal'>
+              22
+            </Label>
+          </Menu.Item>
           <Menu.Item>
             <Button primary onClick={signOut}>Sign Out</Button>
           </Menu.Item>
@@ -23,4 +49,4 @@ const Navbar = () => {
     )
 }
 
-export default Navbar;
+export default withRouter(Navbar);

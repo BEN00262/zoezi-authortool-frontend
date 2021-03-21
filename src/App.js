@@ -8,6 +8,8 @@ import ContentPage from "./components/ContentPage";
 import PaperProvider from "./context/paperContext";
 import LoginForm from './pages/login';
 import ProtectedRoute from "./routes/ProtectedRoute";
+import Analytics from './components/analytics';
+import Notifications from './components/Notifications';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
                 <LoginForm/>
               </Route>
               <ProtectedRoute path="/dashboard" component={ContentPage}/>
+              <ProtectedRoute path="/analytics" component={Analytics}/>
+              <ProtectedRoute path="/notifications" component={Notifications}/>
             </Switch>
           </Container>
         </PaperProvider>

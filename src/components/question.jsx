@@ -49,6 +49,8 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
                 return <NormalQuestionComp saveQuestionToDatabase={saveQuestionToDatabase}/>
             case COMPREHENSION_QUESTION:
                 return <Comprehension saveQuestionToDatabase={saveQuestionToDatabase}/>
+            default:
+                return null;
         }
     }
 
@@ -57,7 +59,10 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
             case NORMAL_QUESTION:
                 return <NormalQuestionComp isSubmitted={isSubmitted} saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
             case COMPREHENSION_QUESTION:
-                return <Comprehension isSubmitted={isSubmitted} saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
+                return <Comprehension isSubmitted={isSubmitted} 
+                            saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
+            default:
+                return null;
         }
     }
 

@@ -1,5 +1,5 @@
 import React,{useState,useContext,useEffect} from "react";
-import {Button,Header,Transition,Segment,Label,Dimmer,Loader, Pagination} from "semantic-ui-react";
+import {Button,Header,Transition,Segment,Label,Dimmer,Loader} from "semantic-ui-react";
 import {motion} from 'framer-motion';
 
 import QuestionComp from "./question";
@@ -9,7 +9,6 @@ import { PaperContext } from "../context/paperContext";
 const CAN_REVIEW = "can:review";
 
 
-// first we will fetch the already created questions from the database and then enable the use to create questions
 const Paper = ({fetched_questions=[]}) => {
     const {authToken
         ,createNotification
@@ -51,6 +50,11 @@ const Paper = ({fetched_questions=[]}) => {
 
     socketIO.on('submission_end',(msg) => {
         setProcessingMessages(msg);
+        
+        setIsSubmitted(true);
+        isSubmittedDispatch(true);
+        fetchPapers(authToken);
+
         setTimeout(() => {
             setIsActive(false);
         },3000);
@@ -106,10 +110,6 @@ const Paper = ({fetched_questions=[]}) => {
             .then(({data}) => {
                 if(data.success){
                     createNotification("Success!","success",data.message);
-                    
-                    setIsSubmitted(true);
-                    isSubmittedDispatch(true);
-                    fetchPapers(authToken);
 
                 }else{
                     throw new Error("Failed to submit paper for review");
@@ -206,7 +206,6 @@ const Paper = ({fetched_questions=[]}) => {
                     })}
 
                 </div>
-                {/* <Pagination defaultActivePage={2} totalPages={5} /> */}
             </motion.div>
         </>
     );

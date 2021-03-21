@@ -43,7 +43,7 @@ const FormComp = () => {
                         <label>Password</label>
                         <input onChange={handleInputChange} value={loginData.password} placeholder='Password' type="password" name="password"/>
                     </Form.Field>
-                    <Button primary style={{width:"100%"}} type='submit'>Login</Button>
+                    <Button primary fluid type='submit'>Login</Button>
                 </Form>
             </Card.Content>
         </Card>

@@ -31,8 +31,8 @@ const verifyToken = () => {
 }
 
 // https://sleepy-lake-97311.herokuapp.com/
-axios.defaults.baseURL = 'http://localhost:3500/';
-const socketIO = io("http://localhost:3600/");
+axios.defaults.baseURL = "https://sleepy-lake-97311.herokuapp.com/";//'http://localhost:3500/';
+const socketIO = io("https://mighty-gorge-45554.herokuapp.com/");//io("http://localhost:3600/");
 
 // we should also pass the roles in the token --> for security
 // rather than the way we are handling it now

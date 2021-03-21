@@ -1,13 +1,12 @@
 import React,{useEffect,useContext} from 'react';
-import {Card,List,Header} from "semantic-ui-react";
 
 import {PaperContext} from "../context/paperContext";
 import SModal from './SModal';
+import FolderComp from './FolderComp';
 
 const SideBar = () => {
     const {changePaperID,createPaperDispatch,papers,authToken,fetchPapers} = useContext(PaperContext);
-
-    // we want to use a suspense here
+    
     useEffect(() => {
         fetchPapers(authToken);
     },[]);
@@ -20,6 +19,7 @@ const SideBar = () => {
         changePaperID(paper_id);
     }
 
+    // create a folder view for these files and groupings
     return (
         <>
             <SModal createPaper={createPaper}/>
@@ -27,23 +27,10 @@ const SideBar = () => {
                 {Object.keys(papers).map((paperType,p_index) => {
                     return (
                         <React.Fragment key={`pt_${p_index}`}>
-                            <Header as="h5">{paperType}</Header>
-                                <Card>
-                                    <Card.Content>
-                                        <List divided verticalAlign='middle'>
-                                            {papers[paperType].papers.map((pp,index) => {
-                                                return (
-                                                    <List.Item key={`pp_${index}`} onClick={() => handlePaperSelect(`${pp.id}`)}>
-                                                        <List.Icon name='file alternate' />
-                                                        <List.Content>
-                                                            <List.Header as='a'>{pp.name.charAt(0).toUpperCase() + pp.name.slice(1)}</List.Header>
-                                                        </List.Content>
-                                                    </List.Item>
-                                                );
-                                            })}
-                                        </List>
-                                    </Card.Content>
-                                </Card>
+                            <FolderComp handlePaperSelect={handlePaperSelect}
+                                paperType={paperType}
+                                papers = {papers[paperType].papers}
+                            />
                         </React.Fragment>
                     );
                 })}
