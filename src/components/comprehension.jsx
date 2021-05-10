@@ -1,9 +1,10 @@
-import React,{useState} from "react";
+import React,{useState, useCallback, useContext} from "react";
 import SunEditor from 'suneditor-react';
 import {Button,Form,Checkbox,Header} from "semantic-ui-react";
 
 import Topic from './topic';
 import SCard from './SCard';
+import {PaperContext} from '../context/paperContext';
 
 const COMPREHENSION_QUESTION = "comprehension";
 const EDITOR_OPTIONS = [
@@ -12,8 +13,13 @@ const EDITOR_OPTIONS = [
     ['fontColor', 'hiliteColor', 'outdent', 'indent', 'align', 'horizontalRule', 'list', 'table'],
     ['image', 'fullScreen', 'showBlocks', 'preview']
 ];
+const CAN_REVIEW = "can:review";
 
 const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitted = false}) => {
+    const { roles } = useContext(PaperContext);
+    const check_role = useCallback((role_required) => roles.includes(role_required),[roles]);
+    const isReviewer = check_role(CAN_REVIEW)
+
     const [question,setQuestion] = useState(retrievedQuestion ? retrievedQuestion.question : "");
     const [topic,setTopic] = useState(retrievedQuestion && retrievedQuestion.topic ? {
         topic: retrievedQuestion.topic,
@@ -133,7 +139,7 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
             </Form.Field>
 
             <Form.Field>
-                <Button disabled={isSubmitted} primary onClick={handleAddQuestion} icon="add" content="Add Question" labelPosition="right"/>
+                <Button circular disabled={isSubmitted} primary onClick={handleAddQuestion} icon="add" content="Add Question" labelPosition="right"/>
             </Form.Field>
 
             {innerQuestion.map((iq,q_index) => {
@@ -142,7 +148,7 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
                         <Header as='h4'>Sub question {q_index + 1}</Header>
                         <Form.Field key={`inner_ques_${q_index}`}>
                             <Form.Field>
-                                <Button disabled={isSubmitted} basic color="red" onClick={(e) => removeInnerQuestion(q_index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
+                                <Button type="button" circular disabled={isSubmitted} basic color="red" onClick={(e) => removeInnerQuestion(q_index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
                             </Form.Field>
                             
                             <Form.Field>
@@ -153,26 +159,27 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
                             </Form.Field>
 
                             <Form.Field>
-                                <Button disabled={isSubmitted} primary onClick={(e) => handleAddInnerQuestionOptions(e,q_index)} icon="add" content="Add Option" labelPosition="right"/>
+                                <Button type="button" circular disabled={isSubmitted && !isReviewer} primary onClick={(e) => handleAddInnerQuestionOptions(e,q_index)} icon="add" content="Add Option" labelPosition="right"/>
                             </Form.Field>
                             {iq.options.map(({option,isCorrect},index) => {
                                 return (
                                     <Form.Field key={`option_${index}`}>
                                         <Form.Group widths="1" inline>
                                             <Form.Field>
-                                                <Checkbox disabled={isSubmitted} onClick={(e) => handleOptionSet(q_index,index)} defaultChecked={isCorrect}/>
+                                                <Checkbox disabled={isSubmitted && !isReviewer} onClick={(e) => handleOptionSet(q_index,index)} defaultChecked={isCorrect}/>
                                             </Form.Field>
                                             <Form.Field>
                                                 <input  onChange={(e) => handleOptionsInput(e,q_index,index)} value={option} type="text"/>
                                             </Form.Field>
 
-                                            <Button disabled={isSubmitted} basic color="red" icon="trash alternate outline" onClick={(e) => removeOption(q_index,index)}/>
+                                            <Button type="button" circular icon="superscript" compact basic color="teal"/>
+                                            <Button type="button" circular compact disabled={isSubmitted && !isReviewer} basic color="red" icon="trash alternate outline" onClick={(e) => removeOption(q_index,index)}/>
                                         </Form.Group>
                                     </Form.Field>
                                 );
                             })}
                              <Form.Field>
-                                <Button primary disabled={(iq.additionalInfo?true:false) || isSubmitted} onClick={(e) => handleAddAdditionalInfo(e,q_index)} content="Add additional information" icon="add" labelPosition="right"/>
+                                <Button type="button" circular primary disabled={(iq.additionalInfo?true:false) || (isSubmitted && !isReviewer)} onClick={(e) => handleAddAdditionalInfo(e,q_index)} content="Add additional information" icon="add" labelPosition="right"/>
                             </Form.Field>
                             <Form.Field>
                                 {iq.additionalInfo ? 
@@ -186,7 +193,7 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
                         </SCard>
                     );
                 })}
-            <Button color="green" disabled={isSubmitted} content='Save Question' icon='save' labelPosition='right'/>
+            <Button circular color="green" disabled={isSubmitted && !isReviewer} content='Save Question' icon='save' labelPosition='right'/>
         </Form>
     );
 }

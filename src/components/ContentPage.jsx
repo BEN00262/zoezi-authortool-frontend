@@ -1,5 +1,5 @@
 import React,{useContext} from 'react';
-import {Grid, Segment} from "semantic-ui-react";
+import {Container, Grid, Segment} from "semantic-ui-react";
 
 import SideBar from "./SideBar";
 import PaperHOC from './paperhoc';
@@ -15,21 +15,23 @@ const ContentPage = () => {
     return (
         <>
         <Navbar/>
-        <Segment style={{marginTop:"5px"}}>
-            <Grid>
-                <Grid.Row>
-                    <Grid.Column width={4}>
-                        
-                        <SideBar/>
-                    
-                    </Grid.Column>
+            <Container>
+                <Segment style={{marginTop:"5px"}}>
+                    <Grid>
+                        <Grid.Row>
+                            <Grid.Column width={4}>
+                                
+                                <SideBar/>
+                            
+                            </Grid.Column>
 
-                    <Grid.Column width={12}>
-                    {paperID ? <PaperHOC/> : null} 
-                    </Grid.Column>
-                </Grid.Row>
-            </Grid>
-        </Segment>
+                            <Grid.Column width={12}>
+                            {paperID ? <PaperHOC/> : null} 
+                            </Grid.Column>
+                        </Grid.Row>
+                    </Grid>
+                </Segment>
+            </Container>
         </>
     );
 }

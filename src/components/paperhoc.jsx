@@ -5,38 +5,55 @@ import Paper from "./paper";
 import {PaperContext} from "../context/paperContext";
 import { useState } from 'react';
 
+import SearchForm from "./SearchForm";
+
 
 const PaperHOC = () => {
     const { 
         paperID,fetchQuestions,
         authToken,isSubmittedDispatch,
-        updatePaperDetails 
+        updatePaperDetails,searchForQuestions
     } = useContext(PaperContext);
     
-    const [fetchedQuestions,setFetchedQuestions] = useState([]);
+    const [fetchedQuestions,setFetchedQuestions] = useState({});
+    const [pageCount,setPageCount] = useState(0);
+    const [currentActivePage, setCurrectActivePage] = useState(1);
     const [isLoading,setIsLoading] = useState(false);
     const [error,setError] = useState(null);
 
     useEffect(() => {
+        setCurrectActivePage(1);
+    },[paperID]);
+
+    const searchQuestionFromDB = (searchTerm) => {
+        searchForQuestions(authToken,paperID,searchTerm)
+            .then(({ data }) => {
+                if (data && data.success){
+                    setFetchedQuestions(data.paper);
+                }
+            })
+    }
+
+    useEffect(() => {
         setIsLoading(true);
-        fetchQuestions(paperID,authToken)
+        fetchQuestions(paperID,authToken, currentActivePage - 1)
             .then(({data}) => {
-                setFetchedQuestions(data);
-                isSubmittedDispatch(data.isSubmitted);
+                setPageCount(data.pageCount);
+                setFetchedQuestions(data.paper);
+                isSubmittedDispatch(data.paper.isSubmitted);
 
                 updatePaperDetails({
-                    grade: data.grade,
-                    subject: data.subject
+                    grade: data.paper.grade,
+                    subject: data.paper.subject
                 });
             })
             .catch(error => {
-                console.log(error);
                 setError(error.message);
             })
             .finally(() => {
                 setIsLoading(false);
             })
-    },[paperID]);
+    },[paperID, currentActivePage]);
 
     if(isLoading){
         return (
@@ -55,10 +72,19 @@ const PaperHOC = () => {
             </Segment>
         );
     }
-
     
     return (
-        <Paper fetched_questions={fetchedQuestions.questions} isSubmitted={fetchedQuestions.isSubmitted}/>
+        <>
+            <SearchForm  searchQuestionFromDB={searchQuestionFromDB}/>
+            
+            <Paper 
+                fetched_questions={fetchedQuestions.questions} 
+                isSubmitted={fetchedQuestions.isSubmitted}
+                pageCount={pageCount}
+                setCurrectActivePage={setCurrectActivePage}
+                currentActivePage={currentActivePage} 
+            />
+        </>
     )
 }
 

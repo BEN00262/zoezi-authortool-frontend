@@ -30,12 +30,9 @@ const verifyToken = () => {
     }
 }
 
-// https://sleepy-lake-97311.herokuapp.com/
-axios.defaults.baseURL = "https://sleepy-lake-97311.herokuapp.com/";//'http://localhost:3500/';
-const socketIO = io("https://mighty-gorge-45554.herokuapp.com/");//io("http://localhost:3600/");
+axios.defaults.baseURL = "https://author-tool-backend.herokuapp.com"; // 'http://localhost:3500/';
+const socketIO = io("https://admintool-rabbitmq-consumer.herokuapp.com/");// io("http://localhost:3600/");
 
-// we should also pass the roles in the token --> for security
-// rather than the way we are handling it now
 let initialContext = {
     authToken:verifyToken(),
     roles:localStorage.getItem("roles") ? localStorage.getItem("roles").split(",") : [],
@@ -55,7 +52,6 @@ const PaperProvider = ({children}) => {
     const [state,dispatch] = useReducer(reducer,initialContext);
 
     socketIO.on('connect', () => {
-        console.log(socketIO.id);
         dispatch({
             type: SET_SOCKETIO_ID,
             payload: socketIO.id
@@ -87,6 +83,14 @@ const PaperProvider = ({children}) => {
     const logoutDispatcher = () => {
         dispatch({
             type: UNSET_LOGIN_TOKEN
+        });
+    }
+
+    const searchForQuestions = (authToken, paperID, searchTerm) => {
+        return axios.get(`/search/${paperID}/${searchTerm}`,{
+            headers: {
+                AuthToken: authToken
+            }
         });
     }
 
@@ -138,8 +142,8 @@ const PaperProvider = ({children}) => {
         })
     }
 
-    const fetchQuestions = (paperID,token) => {
-        return axios.get(`/paper-questions/${paperID}`,{
+    const fetchQuestions = (paperID,token, page_num = 0) => {
+        return axios.get(`/paper-questions/${paperID}/${page_num}`,{
             headers:{
                 AuthToken:token
             }
@@ -241,6 +245,7 @@ const PaperProvider = ({children}) => {
             fetchQuestions,
             isSubmittedDispatch,
             addQuestion,
+            searchForQuestions,
             removeQuestionDispatch,
             loginDispatch,
             approveQuestionDispatch,

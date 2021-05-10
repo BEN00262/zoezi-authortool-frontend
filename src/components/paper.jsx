@@ -1,64 +1,49 @@
 import React,{useState,useContext,useEffect} from "react";
-import {Button,Header,Transition,Segment,Label,Dimmer,Loader} from "semantic-ui-react";
+import {Button,Header,Transition,Segment,Label,Pagination } from "semantic-ui-react";
 import {motion} from 'framer-motion';
 
 import QuestionComp from "./question";
 import { PaperContext } from "../context/paperContext";
+import StatusComp from "./StatusComp";
 
 
 const CAN_REVIEW = "can:review";
 
 
-const Paper = ({fetched_questions=[]}) => {
+const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentActivePage}) => {
     const {authToken
         ,createNotification
         ,paperID
-        ,isSubmittedDispatch
         ,isSubmitted
         ,submitPaperDispatch
         ,approveQuestionDispatch
         ,removeQuestionDispatch
-        ,fetchPapers
-        ,socketIO
         ,socket_io_id
         ,roles} = useContext(PaperContext);
 
     const check_role = (role_required) => roles.includes(role_required);
+    const isReviewer = check_role(CAN_REVIEW);
     
     const [isHidden,setIsHidden] = useState(new Array(fetched_questions.length).fill(true));
-    const [paperQuestions,setPaperQuestions] = useState(fetched_questions);
-    const [is_submitted,setIsSubmitted] = useState(isSubmitted);
 
-    const [processingMessages, setProcessingMessages] = useState("");
+    const [paperQuestions,setPaperQuestions] = useState([]);
+    const [is_submitted,setIsSubmitted] = useState(false);
     const [isActive, setIsActive] = useState(false);
+
+    useEffect(() => {
+        setPaperQuestions(fetched_questions);
+        setIsSubmitted(isSubmitted);
+    },[]);
+
 
     useEffect(() => {
 
     },[isSubmitted]);
 
-    socketIO.on('submission_status',(msg) => {
-        setProcessingMessages(msg);
-        setIsActive(true);
-    })
-
-    socketIO.on('submission_error',(msg) => {
-        setProcessingMessages(msg);
-        setTimeout(() => {
-            setIsActive(false);
-        },3000);
-    })
-
-    socketIO.on('submission_end',(msg) => {
-        setProcessingMessages(msg);
-        
-        setIsSubmitted(true);
-        isSubmittedDispatch(true);
-        fetchPapers(authToken);
-
-        setTimeout(() => {
-            setIsActive(false);
-        },3000);
-    })
+    // set a fetch stuff here on click of the pagination thingy
+    const handlePageSwitch = (e, {activePage}) => {
+        setCurrectActivePage(activePage);
+    }
 
     const updatePaperContent = (new_question,index) => {
         let local_paper_copy = [...paperQuestions];
@@ -109,8 +94,8 @@ const Paper = ({fetched_questions=[]}) => {
         submitPaperDispatch(socket_io_id,paperID,authToken)
             .then(({data}) => {
                 if(data.success){
+                    setIsActive(true);
                     createNotification("Success!","success",data.message);
-
                 }else{
                     throw new Error("Failed to submit paper for review");
                 }
@@ -125,10 +110,6 @@ const Paper = ({fetched_questions=[]}) => {
         approveQuestionDispatch(id,index,authToken)
             .then(({data}) => {
                 if(data.success){
-                    // let paperQuestionsCopy = [...paperQuestions];
-                    // let question_object = paperQuestionsCopy[index];
-                    // question_object.status = "approved";
-                    // setPaperQuestions([...paperQuestionsCopy]);
                     updateQuestionsState("approved",index)
                 }else{
                     throw new Error("Failed to approve question");
@@ -145,19 +126,19 @@ const Paper = ({fetched_questions=[]}) => {
         setIsHidden(clone_state)
     }
 
+    // preventing this reloads
     return (
         <>
-            <Dimmer active={isActive}>
-                <Loader content={processingMessages} />
-            </Dimmer>
+            <StatusComp isActive={isActive} setIsActive={setIsActive} setIsSubmitted={setIsSubmitted}/>
             <motion.div
                 initial={{ opacity:0 }}
                 animate={{ opacity:1, duration:0.4 }}
             >      
-                <div style={{marginBottom:"20px"}}>
-                    <Button color="teal" disabled={is_submitted} onClick={addQuestion} content='create question' icon='add' labelPosition='right'/>
+                <div style={{marginBottom:"10px", borderBottom:"1px solid #dbdbdb", paddingBottom:"5px"}}>
+                    <Button circular color="teal" disabled={is_submitted} onClick={addQuestion} content='create question' icon='add' labelPosition='right'/>
                     
                     <Button 
+                        circular
                         color="orange" 
                         disabled={check_role(CAN_REVIEW) || is_submitted}
                         onClick={submitForReviewAction} 
@@ -184,13 +165,14 @@ const Paper = ({fetched_questions=[]}) => {
                                         <Segment basic textAlign={"right"} color='red'>
                                         {is_submitted && check_role(CAN_REVIEW)? 
                                             <Button basic color="orange" 
+                                                circular
                                                 disabled={retrievedQuestion && retrievedQuestion.isExposed} 
                                                 icon 
                                                 onClick={(e) => approveAuthorQuestion(retrievedQuestion && retrievedQuestion._id,index)} 
                                                 content="Approve" icon="thumbs up alternate outline" labelPosition="right"/> : null
                                         }
                                             
-                                            <Button basic color="red" disabled={isSubmitted} onClick={(e) => removeQuestion(retrievedQuestion ? retrievedQuestion._id:null,index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
+                                            <Button circular basic color="red" disabled={isSubmitted && !isReviewer} onClick={(e) => removeQuestion(retrievedQuestion ? retrievedQuestion._id:null,index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
                                         
                                         </Segment>
                                     </Segment.Group>
@@ -204,7 +186,7 @@ const Paper = ({fetched_questions=[]}) => {
                             </React.Fragment>
                         );
                     })}
-
+                    { pageCount > 0 ? <Pagination onPageChange={handlePageSwitch} defaultActivePage={currentActivePage} totalPages={pageCount} /> : null}
                 </div>
             </motion.div>
         </>

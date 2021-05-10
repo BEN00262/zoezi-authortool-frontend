@@ -13,20 +13,12 @@ const Navbar = (props) => {
         return <Redirect to="/"/>
     }
 
-    const navigateHome = () => {
-      return props.history.push('/dashboard'); 
-    }
-
-    const navigateNotifications = () => {
-      return props.history.push('/notifications'); 
-    }
-
-    const navigateToAnalytics = () => {
-      return props.history.push('/analytics')
-    }
+    const navigateHome = () => props.history.push('/dashboard');
+    const navigateNotifications = () => props.history.push('/notifications');
+    const navigateToAnalytics = () => props.history.push('/analytics')
 
     return (
-      <Menu size='small' style={{marginTop:"5px"}}>
+      <Menu size='small' attached="top" style={{marginTop:"5px"}}>
         <Menu.Item header onClick={navigateHome}>
           <img src={AdminFavi} />
         </Menu.Item>

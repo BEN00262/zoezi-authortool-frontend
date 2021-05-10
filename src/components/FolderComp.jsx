@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
-import { Icon, Label, List, Header } from 'semantic-ui-react';
+import React, { useState, useContext } from 'react';
+import { Icon, List, Header } from 'semantic-ui-react';
+import { PaperContext } from '../context/paperContext';
 
 
 // this takes in the name of the folder and the contained files
 const FolderComp = ({paperType,papers,handlePaperSelect}) => {
     const [isOpen,setIsOpen] = useState(false);
+
+    // listen for the active folder thing
+    const {
+        paperID
+    } = useContext(PaperContext);
 
     // toggle the open and close on click :)
     return (
@@ -14,7 +20,6 @@ const FolderComp = ({paperType,papers,handlePaperSelect}) => {
                 {paperType}
             </Header>
 
-            {/* we want to display the files individually */}
             <div style={{marginLeft:"10px", marginBottom:"10px"}} hidden={!isOpen}>
                         <List divided verticalAlign='middle'>
                             {papers.map((pp,index) => {
@@ -23,11 +28,11 @@ const FolderComp = ({paperType,papers,handlePaperSelect}) => {
                                         <List.Icon name='file alternate outline' />
                                         <List.Content>
                                             <List.Header as='a'>
-                                                {pp.name.charAt(0).toUpperCase() + pp.name.slice(1)}
-                                                {/* <Label color='green' horizontal>
-                                                    submitted{' '}
-                                                    <Icon name='check circle outline' />
-                                                </Label> */}
+                                                <div style={{
+                                                    textDecoration:paperID === pp.id ? "underline" : "inherit",
+                                                }}>
+                                                    {pp.name.charAt(0).toUpperCase() + pp.name.slice(1)}
+                                                </div>
                                             </List.Header>
                                         </List.Content>
                                     </List.Item>

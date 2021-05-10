@@ -20,6 +20,7 @@ const SideBar = () => {
     }
 
     // create a folder view for these files and groupings
+    // check for the active paper then highlight it for visibility's sake
     return (
         <>
             <SModal createPaper={createPaper}/>
