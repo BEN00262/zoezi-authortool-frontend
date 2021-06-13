@@ -14,6 +14,7 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
     const {authToken
         ,createNotification
         ,paperID
+        ,setIsSample
         ,changePaperID
         ,removePaper
         ,paperName
@@ -58,6 +59,17 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
         let local_paper_copy = [...paperQuestions];
         local_paper_copy[index] = new_question;
         setPaperQuestions(local_paper_copy);
+    }
+
+    const internalSetIsSample = (index,questionID,isSample) => {
+        setIsSample(authToken, questionID, isSample)
+            .then(status => {
+                if (status) {
+                    let local_paper_copy = [...paperQuestions];
+                    local_paper_copy[index].isSample = isSample;
+                    setPaperQuestions(local_paper_copy);
+                }
+            })
     }
 
 
@@ -225,6 +237,16 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
                                             </Label>
                                         </Segment>
                                         <Segment basic textAlign={"right"} color='red'>
+                                            {/* check if the paper is saved first */}
+                                        {retrievedQuestion && (retrievedQuestion._id !== null) && check_role(CAN_REVIEW)? 
+                                            <Button basic compact color="olive" 
+                                                // disabled={retrievedQuestion && retrievedQuestion.isExposed} 
+                                                icon 
+                                                onClick={(e) => internalSetIsSample(index,retrievedQuestion && retrievedQuestion._id,(retrievedQuestion && !retrievedQuestion.isSample))}
+                                                // update status za hii stuff pia
+                                                // onClick={(e) => approveAuthorQuestion(retrievedQuestion && retrievedQuestion._id,index)} 
+                                                content={retrievedQuestion && retrievedQuestion.isSample ? "remove sample": "set sample"}/> : null
+                                        }
                                         {is_submitted && check_role(CAN_REVIEW)? 
                                             <Button basic compact color="orange" 
                                                 disabled={retrievedQuestion && retrievedQuestion.isExposed} 

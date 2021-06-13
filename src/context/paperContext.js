@@ -13,7 +13,8 @@ import {
     FETCH_PAPERS,
     CHANGE_CURRENT_PAPER_DETAILS,
     CHANGE_PAPER_ID,
-    CREATE_PAPER
+    CREATE_PAPER,
+    IS_REFRESHING
 } from './actionTypes';
 import reducer from "./reducer";
 
@@ -26,6 +27,7 @@ const verifyToken = () => {
         return null;
     }
 }
+
 // "https://author-tool-backend.herokuapp.com";
 axios.defaults.baseURL = "https://author-tool-backend.herokuapp.com";// 'http://localhost:3500/';
 // io("https://admintool-rabbitmq-consumer.herokuapp.com/");
@@ -43,7 +45,8 @@ let initialContext = {
     paperType:"",
     currentQuestions:[],
     papers:{},
-    socket_io_id: null
+    socket_io_id: null,
+    isRefreshing: false
 };
 
 export const PaperContext = createContext(initialContext);
@@ -95,11 +98,27 @@ const PaperProvider = ({children}) => {
     }
 
     const searchForQuestions = (authToken, paperID, searchTerm) => {
-        return axios.get(`/search/${paperID}/${searchTerm}`,{
-            headers: {
-                AuthToken: authToken
-            }
+        return axios.get(`/search/${paperID}?${searchTerm}`,{
+            headers: { AuthToken: authToken }
         });
+    }
+
+    const setIsSample = (authToken,questionID, isSample) => {
+        return axios.post(`/set-sample/${questionID}`,{ isSample },{
+            headers:{ AuthToken:authToken }
+        })
+            .then(({data}) => {
+                if (data.success){
+                    createNotification("Success!","success","Question set/removed as sample");
+                    return data.success
+                }
+
+                throw new Error("Failed to set question as sample");
+            })
+            .catch(error => {   
+                createNotification("Error!","danger",error.message);
+                return false
+            })
     }
 
     const loginDispatch = (loginCreds) => {
@@ -198,6 +217,13 @@ const PaperProvider = ({children}) => {
         })
     }
 
+    const setIsRefreshingDispatch = (status) => {
+        dispatch({
+            type: IS_REFRESHING,
+            payload: status
+        })
+    }
+
     const createPaperDispatch = (paper,token) =>{
         axios.post("create-paper",paper,{
             headers:{
@@ -255,6 +281,7 @@ const PaperProvider = ({children}) => {
             createPaperDispatch,
             fetchPapers,
             fetchQuestions,
+            setIsSample,
             isSubmittedDispatch,
             addQuestion,
             searchForQuestions,
@@ -265,11 +292,13 @@ const PaperProvider = ({children}) => {
             createNotification,
             logoutDispatcher,
             removePaper,
+            setIsRefreshingDispatch,
             roles: state.roles,
             isSubmitted:state.isSubmitted,
             currentQuestions:state.currentQuestions,
             socketIO,
-            socket_io_id: state.socket_io_id
+            socket_io_id: state.socket_io_id,
+            isRefreshing: state.isRefreshing
         }}>
             {children}
         </PaperContext.Provider>

@@ -8,7 +8,8 @@ import {
     CHANGE_CURRENT_PAPER_DETAILS,
     CHANGE_PAPER_ID,
     CREATE_PAPER,
-    UNSET_LOGIN_TOKEN
+    UNSET_LOGIN_TOKEN,
+    IS_REFRESHING
 } from './actionTypes';
 
 // update this file later 
@@ -41,6 +42,10 @@ const reducer = (state,action) => {
         case UPDATE_IS_SUBMITTED:
             return produce(state,draft => {
                 draft.isSubmitted = action.payload;
+            })
+        case IS_REFRESHING:
+            return produce(state,draft => {
+                draft.isRefreshing = action.payload;
             })
         case FETCH_PAPERS:
             return produce(state, newState => {

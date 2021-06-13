@@ -13,6 +13,7 @@ const PaperHOC = () => {
         paperID,fetchQuestions,
         authToken,isSubmittedDispatch,
         updatePaperDetails,searchForQuestions
+        ,isRefreshing
     } = useContext(PaperContext);
     
     const [fetchedQuestions,setFetchedQuestions] = useState([]);
@@ -61,10 +62,8 @@ const PaperHOC = () => {
             .catch(error => {
                 setError(error.message);
             })
-            .finally(() => {
-                setIsLoading(false);
-            })
-    },[paperID, currentActivePage]);
+            .finally(() => { setIsLoading(false); })
+    },[paperID, currentActivePage, isRefreshing]);
 
     if(isLoading){
         return (
@@ -83,6 +82,10 @@ const PaperHOC = () => {
             </Segment>
         );
     }
+
+    console.log(
+        fetchedQuestions[0]
+    )
     
     return (
         <>
