@@ -15,7 +15,8 @@ const PaperHOC = () => {
         updatePaperDetails,searchForQuestions
     } = useContext(PaperContext);
     
-    const [fetchedQuestions,setFetchedQuestions] = useState({});
+    const [fetchedQuestions,setFetchedQuestions] = useState([]);
+    const [searchTerm, setSearchTerm] = useState(null);
     const [pageCount,setPageCount] = useState(0);
     const [currentActivePage, setCurrectActivePage] = useState(1);
     const [isLoading,setIsLoading] = useState(false);
@@ -25,26 +26,36 @@ const PaperHOC = () => {
         setCurrectActivePage(1);
     },[paperID]);
 
-    const searchQuestionFromDB = (searchTerm) => {
-        searchForQuestions(authToken,paperID,searchTerm)
+    useEffect(() => {
+        if (searchTerm !== null){
+            searchForQuestions(authToken,paperID,searchTerm)
             .then(({ data }) => {
                 if (data && data.success){
-                    setFetchedQuestions(data.paper);
+                    setPageCount(1);
+                    console.log(data);
+                    setFetchedQuestions(data.paper.questions);
                 }
             })
-    }
+            .catch(error => {
+                setError(error.message);
+            })
+        }
+    },[searchTerm])
 
     useEffect(() => {
         setIsLoading(true);
         fetchQuestions(paperID,authToken, currentActivePage - 1)
             .then(({data}) => {
                 setPageCount(data.pageCount);
-                setFetchedQuestions(data.paper);
+                // console.log(data.paper);
+                setFetchedQuestions(data.paper.questions);
                 isSubmittedDispatch(data.paper.isSubmitted);
 
                 updatePaperDetails({
                     grade: data.paper.grade,
-                    subject: data.paper.subject
+                    subject: data.paper.subject,
+                    paperName: data.paper.paperName,
+                    paperType: data.paper.paperType
                 });
             })
             .catch(error => {
@@ -75,11 +86,11 @@ const PaperHOC = () => {
     
     return (
         <>
-            <SearchForm  searchQuestionFromDB={searchQuestionFromDB}/>
+            <SearchForm  setSearchTerm={setSearchTerm}/>
             
-            <Paper 
-                fetched_questions={fetchedQuestions.questions} 
-                isSubmitted={fetchedQuestions.isSubmitted}
+            {/* we want to rerender the paper when the search term is applied here what do we do? */}
+            <Paper
+                fetched_questions={fetchedQuestions}
                 pageCount={pageCount}
                 setCurrectActivePage={setCurrectActivePage}
                 currentActivePage={currentActivePage} 

@@ -139,7 +139,7 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
             </Form.Field>
 
             <Form.Field>
-                <Button circular disabled={isSubmitted} primary onClick={handleAddQuestion} icon="add" content="Add Question" labelPosition="right"/>
+                <Button disabled={isSubmitted} primary onClick={handleAddQuestion} icon="add" content="Question" labelPosition="right"/>
             </Form.Field>
 
             {innerQuestion.map((iq,q_index) => {
@@ -148,7 +148,7 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
                         <Header as='h4'>Sub question {q_index + 1}</Header>
                         <Form.Field key={`inner_ques_${q_index}`}>
                             <Form.Field>
-                                <Button type="button" circular disabled={isSubmitted} basic color="red" onClick={(e) => removeInnerQuestion(q_index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
+                                <Button type="button" compact disabled={isSubmitted} basic color="red" onClick={(e) => removeInnerQuestion(q_index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
                             </Form.Field>
                             
                             <Form.Field>
@@ -159,7 +159,7 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
                             </Form.Field>
 
                             <Form.Field>
-                                <Button type="button" circular disabled={isSubmitted && !isReviewer} primary onClick={(e) => handleAddInnerQuestionOptions(e,q_index)} icon="add" content="Add Option" labelPosition="right"/>
+                                <Button type="button" compact disabled={isSubmitted && !isReviewer} primary onClick={(e) => handleAddInnerQuestionOptions(e,q_index)} icon="add" content="Option" labelPosition="right"/>
                             </Form.Field>
                             {iq.options.map(({option,isCorrect},index) => {
                                 return (
@@ -172,14 +172,14 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
                                                 <input  onChange={(e) => handleOptionsInput(e,q_index,index)} value={option} type="text"/>
                                             </Form.Field>
 
-                                            <Button type="button" circular icon="superscript" compact basic color="teal"/>
+                                            <Button type="button" circular icon="superscript" disabled={isSubmitted && !isReviewer} compact basic color="teal"/>
                                             <Button type="button" circular compact disabled={isSubmitted && !isReviewer} basic color="red" icon="trash alternate outline" onClick={(e) => removeOption(q_index,index)}/>
                                         </Form.Group>
                                     </Form.Field>
                                 );
                             })}
                              <Form.Field>
-                                <Button type="button" circular primary disabled={(iq.additionalInfo?true:false) || (isSubmitted && !isReviewer)} onClick={(e) => handleAddAdditionalInfo(e,q_index)} content="Add additional information" icon="add" labelPosition="right"/>
+                                <Button type="button" compact primary disabled={(iq.additionalInfo?true:false) || (isSubmitted && !isReviewer)} onClick={(e) => handleAddAdditionalInfo(e,q_index)} content="Additional Information" icon="add" labelPosition="right"/>
                             </Form.Field>
                             <Form.Field>
                                 {iq.additionalInfo ? 
@@ -193,7 +193,7 @@ const Comprehension = ({saveQuestionToDatabase,retrievedQuestion,index,isSubmitt
                         </SCard>
                     );
                 })}
-            <Button circular color="green" disabled={isSubmitted && !isReviewer} content='Save Question' icon='save' labelPosition='right'/>
+            <Button basic color="green" disabled={isSubmitted && !isReviewer} content='Save Question' icon='save' labelPosition='right'/>
         </Form>
     );
 }

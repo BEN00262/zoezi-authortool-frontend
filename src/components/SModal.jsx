@@ -87,7 +87,7 @@ const SModal = ({createPaper}) => {
       onOpen={() => setOpen(true)}
       size="tiny"
       open={open}
-      trigger={<Button circular fluid color="grey" content='create paper' icon='pencil alternate' labelPosition='right'/>}
+      trigger={<Button basic compact fluid primary content='create paper' icon='pencil alternate' labelPosition='right'/>}
     >
       <Modal.Header>New Paper</Modal.Header>
         <Modal.Content>

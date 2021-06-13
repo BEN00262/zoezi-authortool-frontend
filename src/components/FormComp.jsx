@@ -6,7 +6,7 @@ import {PaperContext} from "../context/paperContext";
 
 const FormComp = () => {
     const {loginDispatch,authToken} = useContext(PaperContext);
-
+    const [isLoading,setIsLoading] = useState(false);
     const [loginData,setLoginData] = useState({
         email:"",
         password:""
@@ -21,7 +21,9 @@ const FormComp = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        setIsLoading(true);
         loginDispatch(loginData);
+        setIsLoading(false);
     }
 
     if(authToken){
@@ -43,7 +45,7 @@ const FormComp = () => {
                         <label>Password</label>
                         <input onChange={handleInputChange} value={loginData.password} placeholder='Password' type="password" name="password"/>
                     </Form.Field>
-                    <Button primary fluid type='submit'>Login</Button>
+                    <Button loading={isLoading} primary fluid type='submit'>Login</Button>
                 </Form>
             </Card.Content>
         </Card>

@@ -10,6 +10,8 @@ import LoginForm from './pages/login';
 import ProtectedRoute from "./routes/ProtectedRoute";
 import Analytics from './components/analytics';
 import Notifications from './components/Notifications';
+import SocketWatcher from './components/SocketWatcher';
+import AuthorManagement from './pages/authorManagement';
 
 function App() {
   return (
@@ -17,6 +19,7 @@ function App() {
         <ReactNotification />
         <PaperProvider>
           <Container>
+            <SocketWatcher/>
             <Switch>
               <Route exact path="/">
                 <LoginForm/>
@@ -24,6 +27,7 @@ function App() {
               <ProtectedRoute path="/dashboard" component={ContentPage}/>
               <ProtectedRoute path="/analytics" component={Analytics}/>
               <ProtectedRoute path="/notifications" component={Notifications}/>
+              {/* <ProtectedRoute path="/admin" component={AuthorManagement}/> */}
             </Switch>
           </Container>
         </PaperProvider>

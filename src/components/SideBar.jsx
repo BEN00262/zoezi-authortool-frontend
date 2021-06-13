@@ -1,8 +1,10 @@
 import React,{useEffect,useContext} from 'react';
+import { Button } from 'semantic-ui-react';
 
 import {PaperContext} from "../context/paperContext";
 import SModal from './SModal';
 import FolderComp from './FolderComp';
+import PaperImport from './paperimport';
 
 const SideBar = () => {
     const {changePaperID,createPaperDispatch,papers,authToken,fetchPapers} = useContext(PaperContext);
@@ -24,6 +26,7 @@ const SideBar = () => {
     return (
         <>
             <SModal createPaper={createPaper}/>
+            <PaperImport/>
             <div  style={{height:"85vh", overflowY:"scroll", marginTop:"10px", padding:"10px"}}>
                 {Object.keys(papers).map((paperType,p_index) => {
                     return (

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect, useMemo } from 'react';
 import { Icon, List, Header } from 'semantic-ui-react';
 import { PaperContext } from '../context/paperContext';
 
@@ -7,12 +7,17 @@ import { PaperContext } from '../context/paperContext';
 const FolderComp = ({paperType,papers,handlePaperSelect}) => {
     const [isOpen,setIsOpen] = useState(false);
 
-    // listen for the active folder thing
     const {
         paperID
     } = useContext(PaperContext);
 
-    // toggle the open and close on click :)
+    
+
+    const _handlePaperSelectContextMenu = (e,paperID) => {
+        e.preventDefault();
+    }
+
+    
     return (
         <div>
             <Header as="h5" onClick={() => setIsOpen(!isOpen)} style={{cursor:'pointer'}}>
@@ -20,16 +25,18 @@ const FolderComp = ({paperType,papers,handlePaperSelect}) => {
                 {paperType}
             </Header>
 
-            <div style={{marginLeft:"10px", marginBottom:"10px"}} hidden={!isOpen}>
+            <div style={{marginLeft:"10px", marginBottom:"10px"}} hidden={!isOpen }>
                         <List divided verticalAlign='middle'>
                             {papers.map((pp,index) => {
+                                const isSelected = paperID === pp.id;
                                 return (
-                                    <List.Item key={`pp_${index}`} onClick={() => handlePaperSelect(`${pp.id}`)}>
-                                        <List.Icon name='file alternate outline' />
+                                    <List.Item key={`pp_${index}`} onContextMenu={(e) => _handlePaperSelectContextMenu(e,`${pp.id}`)}  onClick={() => handlePaperSelect(`${pp.id}`)}>
+                                        <List.Icon name={isSelected ?'file alternate' : 'file alternate outline'} />
                                         <List.Content>
+                                            
                                             <List.Header as='a'>
                                                 <div style={{
-                                                    textDecoration:paperID === pp.id ? "underline" : "inherit",
+                                                    textDecoration:isSelected ? "underline" : "inherit",
                                                 }}>
                                                     {pp.name.charAt(0).toUpperCase() + pp.name.slice(1)}
                                                 </div>

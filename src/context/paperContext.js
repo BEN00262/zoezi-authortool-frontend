@@ -18,29 +18,29 @@ import {
 import reducer from "./reducer";
 
 const verifyToken = () => {
-    const token = localStorage.getItem("authToken");
     try{
+        const token = localStorage.getItem("authToken");
         const { exp } = jwt_decode(token);
-        if (Date.now() >= exp * 1000) {
-            return null;
-        }
-        return token;
+        return Date.now() >= exp * 1000 ? null : token;
     }catch(error) {
         return null;
     }
 }
-
-axios.defaults.baseURL = "https://author-tool-backend.herokuapp.com"; // 'http://localhost:3500/';
+// "https://author-tool-backend.herokuapp.com";
+axios.defaults.baseURL = "https://author-tool-backend.herokuapp.com";// 'http://localhost:3500/';
+// io("https://admintool-rabbitmq-consumer.herokuapp.com/");
 const socketIO = io("https://admintool-rabbitmq-consumer.herokuapp.com/");// io("http://localhost:3600/");
 
 let initialContext = {
     authToken:verifyToken(),
+    // remember to package this in the token and actually to verify them
     roles:localStorage.getItem("roles") ? localStorage.getItem("roles").split(",") : [],
     isSubmitted:false,
     paperID:"",
     paperName:"",
     paperGrade:"",
     paperSubject:"",
+    paperType:"",
     currentQuestions:[],
     papers:{},
     socket_io_id: null
@@ -50,6 +50,8 @@ export const PaperContext = createContext(initialContext);
 
 const PaperProvider = ({children}) => {
     const [state,dispatch] = useReducer(reducer,initialContext);
+
+    // find a way for listening for the login credential
 
     socketIO.on('connect', () => {
         dispatch({
@@ -78,6 +80,12 @@ const PaperProvider = ({children}) => {
               onScreen: true
             }
           });
+    }
+
+    const removePaper = (paperID,authToken) => {
+        return axios.delete(`/remove-paper/${paperID}`,{
+            headers: { AuthToken: authToken }
+        });
     }
 
     const logoutDispatcher = () => {
@@ -118,12 +126,14 @@ const PaperProvider = ({children}) => {
             })
     }
 
-    const updatePaperDetails = (details) => {
+    const updatePaperDetails = details => {
         dispatch({
             type: CHANGE_CURRENT_PAPER_DETAILS,
             payload: {
                 grade: details.grade,
-                subject: details.subject
+                subject: details.subject,
+                paperName: details.paperName,
+                paperType: details.paperType
             }
         })
     }
@@ -203,7 +213,7 @@ const PaperProvider = ({children}) => {
                     createNotification("Success!","success","Paper created successfully");
                 }else{
                     data.errors.forEach(error => {
-                        createNotification("Error!","error",error);
+                        createNotification("Error!","danger",error);
                     })
                 }
             })
@@ -235,9 +245,11 @@ const PaperProvider = ({children}) => {
         <PaperContext.Provider value={{
             paperID:state.paperID,
             papers:state.papers,
+            paperName: state.paperName,
             authToken:state.authToken,
             paperGrade: state.paperGrade,
             paperSubject: state.paperSubject,
+            paperType: state.paperType,
             updatePaperDetails,
             changePaperID,
             createPaperDispatch,
@@ -252,6 +264,7 @@ const PaperProvider = ({children}) => {
             submitPaperDispatch,
             createNotification,
             logoutDispatcher,
+            removePaper,
             roles: state.roles,
             isSubmitted:state.isSubmitted,
             currentQuestions:state.currentQuestions,

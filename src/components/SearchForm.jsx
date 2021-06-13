@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Button, Form } from "semantic-ui-react"
 
-const SearchForm = ({ searchQuestionFromDB }) => {
+
+// start working on this now
+const SearchForm = ({ setSearchTerm: setParentSearchTerm }) => {
     const [searchTerm, setSearchTerm] = useState("");
 
     const changeSearchTerm = (e) => {
@@ -10,7 +12,7 @@ const SearchForm = ({ searchQuestionFromDB }) => {
 
     const searchDB = (e) => {
         e.preventDefault();
-        searchQuestionFromDB(searchTerm);
+        setParentSearchTerm(searchTerm);
     }
 
     return (

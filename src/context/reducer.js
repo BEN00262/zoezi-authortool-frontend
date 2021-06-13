@@ -31,6 +31,12 @@ const reducer = (state,action) => {
             return produce(state,newState => {
                 newState.authToken = null;
                 newState.roles = null;
+                newState.isSubmitted = false;
+                newState.paperID = "";
+                newState.paperName = "";
+                newState.paperGrade = "";
+                newState.paperSubject = "";
+                newState.papers = {};
             })
         case UPDATE_IS_SUBMITTED:
             return produce(state,draft => {
@@ -52,7 +58,9 @@ const reducer = (state,action) => {
             return {
                 ...state,
                 paperGrade: action.payload.grade,
-                paperSubject: action.payload.subject
+                paperSubject: action.payload.subject,
+                paperName: action.payload.paperName,
+                paperType: action.payload.paperType
             }
         case CHANGE_PAPER_ID:
             let myLocalState = {...state}

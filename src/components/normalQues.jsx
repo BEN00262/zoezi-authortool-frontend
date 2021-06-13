@@ -110,7 +110,7 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
                 }} onChange={(content) => setQuestion(content) } setContents={question} showToolbar={true} enableToolbar={true}/>
             </Form.Field>
             <Form.Field>
-                <Button type="button" compact circular primary disabled={isSubmitted} onClick={handleAddOptions} icon="add" content="Add Option" labelPosition="right"/>
+                <Button type="button" compact primary disabled={isSubmitted && !isReviewer} onClick={handleAddOptions} icon="add" content="Option" labelPosition="right"/>
             </Form.Field>
             
                 {options.map((foundOption,index) => {
@@ -118,15 +118,15 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
                         <Form.Field key={`option_${index}`}>
                             <Form.Group widths="1" inline>
                                 <Form.Field>
-                                    <Checkbox disabled={isSubmitted} defaultChecked={retrievedQuestion && foundOption.isCorrect ? true : false} onClick={(e) => onOptionSet(index)}/>
+                                    <Checkbox disabled={isSubmitted && !isReviewer} defaultChecked={retrievedQuestion && foundOption.isCorrect ? true : false} onClick={(e) => onOptionSet(index)}/>
                                 </Form.Field>
                                 <Form.Field>
                                     <input value={retrievedQuestion ? foundOption.option : null} onChange={(e) => handleOptionsInput(e,index)} type="text"/>
                                 </Form.Field>
 
-                                <Button type="button" circular icon="superscript" compact basic color="teal"/>
+                                <Button type="button" circular icon="superscript" disabled={isSubmitted && !isReviewer} compact basic color="teal"/>
 
-                                <Button type="button" circular compact basic color="red" disabled={isSubmitted} icon onClick={(e) => removeOption(e,index)}>
+                                <Button type="button" circular compact basic color="red" disabled={isSubmitted && !isReviewer} icon onClick={(e) => removeOption(e,index)}>
                                     <Icon name="trash alternate outline"/>
                                 </Button>
                             </Form.Group>
@@ -135,7 +135,7 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
                 })}
             
             <Form.Field>
-                <Button type="button" compact circular primary disabled={(additionalInfo?true:false) || isSubmitted } onClick={handleAddAdditionalInfo} content="Add additional information" icon="add" labelPosition="right"/>
+                <Button type="button" compact primary disabled={(additionalInfo?true:false) || isSubmitted } onClick={handleAddAdditionalInfo} content="Additional Information" icon="add" labelPosition="right"/>
             </Form.Field>
             <Form.Field>
                {additionalInfo ? 
@@ -145,7 +145,7 @@ const NormalQuestionComp = ({saveQuestionToDatabase,retrievedQuestion = {},index
                     :null
                 } 
             </Form.Field>
-            <Button circular color="green" content='Save Question' disabled={isSubmitted && !isReviewer} icon='save' labelPosition='right'/>
+            <Button basic color="green" content='Save Question' disabled={isSubmitted && !isReviewer} icon='save' labelPosition='right'/>
         </Form>
         </>
     );

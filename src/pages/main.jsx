@@ -6,9 +6,9 @@ import PaperProvider from "./context/paperContext";
 function MainPage() {
   return (
     <PaperProvider>
-      <Container>
+      {/* <Container> */}
         <ContentPage/>
-      </Container>
+      {/* </Container> */}
     </PaperProvider>
   );
 }

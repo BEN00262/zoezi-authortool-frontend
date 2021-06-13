@@ -14,11 +14,16 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
     const {authToken
         ,createNotification
         ,paperID
+        ,changePaperID
+        ,removePaper
+        ,paperName
+        ,fetchPapers
         ,isSubmitted
         ,submitPaperDispatch
         ,approveQuestionDispatch
         ,removeQuestionDispatch
-        ,socket_io_id
+        ,socket_io_id,
+        paperType
         ,roles} = useContext(PaperContext);
 
     const check_role = (role_required) => roles.includes(role_required);
@@ -34,6 +39,10 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
         setPaperQuestions(fetched_questions);
         setIsSubmitted(isSubmitted);
     },[]);
+
+    useEffect(() => {
+        setPaperQuestions(fetched_questions);
+    },[fetched_questions]);
 
 
     useEffect(() => {
@@ -54,6 +63,29 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
 
     const addQuestion = (e) => {
         setPaperQuestions([...paperQuestions,null]);
+    }
+
+    const removeMyPaper = () => {
+        let reply = window.confirm("are you sure?")
+
+        if (!reply)
+            return;
+
+        removePaper(paperID,authToken)
+            .then(({data}) => {
+                if (data){
+                    if (data.success){
+                        createNotification("Success!!","success","Paper deleted successfully");
+                        fetchPapers(authToken);
+                        changePaperID(null);
+                        return;
+                    }
+                    throw new Error(data.error);
+                }
+            })
+            .catch(error => {
+                createNotification("Error!!","danger",error.message);
+            })
     }
 
     const removeQuestion = (questionId,index) => {
@@ -126,7 +158,6 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
         setIsHidden(clone_state)
     }
 
-    // preventing this reloads
     return (
         <>
             <StatusComp isActive={isActive} setIsActive={setIsActive} setIsSubmitted={setIsSubmitted}/>
@@ -134,26 +165,57 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
                 initial={{ opacity:0 }}
                 animate={{ opacity:1, duration:0.4 }}
             >      
-                <div style={{marginBottom:"10px", borderBottom:"1px solid #dbdbdb", paddingBottom:"5px"}}>
-                    <Button circular color="teal" disabled={is_submitted} onClick={addQuestion} content='create question' icon='add' labelPosition='right'/>
+                <div style={{marginBottom:"10px", borderBottom:"1px solid #dbdbdb", paddingBottom:"1px"}}>
+                    <Button compact basic color="teal" disabled={is_submitted} onClick={addQuestion} content='create question' icon='add' labelPosition='right'/>
                     
-                    <Button 
-                        circular
+                    <Button
+                        compact
+                        basic
                         color="orange" 
                         disabled={check_role(CAN_REVIEW) || is_submitted}
                         onClick={submitForReviewAction} 
                         content='submit paper' 
                         icon='send' 
                         labelPosition='right'/>
+
+                    <Button
+                        compact
+                        basic
+                        color="red"
+                        disabled={is_submitted && !isReviewer}
+                        onClick={removeMyPaper} 
+                        content='delete paper' 
+                        icon='trash alternate outline' 
+                        labelPosition='right'/>
+
+                    {isReviewer ? <Button
+                        compact
+                        basic
+                        color="green"
+                        
+                        disabled={true}//{is_submitted && !isReviewer}
+                        // onClick={removeMyPaper} 
+                        content='approve paper' 
+                        icon='thumbs up outline'
+                        labelPosition='right'/>
+                        : null }
+
+                    <div style={{
+                        margin:"5px"
+                    }}>
+                        <Label content={paperType}/>
+                        <Label content={paperName}/>  
+                    </div> 
                 </div>
+                
 
                 
-                <div style={{height:"85vh", overflowY:"scroll", marginTop:"10px", paddingRight:"10px", paddingLeft:"10px"}} >
+                <div style={{height:"85vh", overflowY:"scroll",paddingRight:"6px", paddingLeft:"4px"}} >
                     {paperQuestions.map((retrievedQuestion,index) => {
                         return (
                             <React.Fragment key={`question_${index}`}>
                                 
-                                    <Segment.Group horizontal>
+                                    <Segment.Group horizontal compact>
                                         <Segment onClick={(x) => toggleQuestionVisibility(index)} style={{cursor:"pointer"}} color='orange'>
                                             <Header as='h3'>Question  {index + 1}</Header>
                                         </Segment>
@@ -164,15 +226,14 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
                                         </Segment>
                                         <Segment basic textAlign={"right"} color='red'>
                                         {is_submitted && check_role(CAN_REVIEW)? 
-                                            <Button basic color="orange" 
-                                                circular
+                                            <Button basic compact color="orange" 
                                                 disabled={retrievedQuestion && retrievedQuestion.isExposed} 
                                                 icon 
                                                 onClick={(e) => approveAuthorQuestion(retrievedQuestion && retrievedQuestion._id,index)} 
                                                 content="Approve" icon="thumbs up alternate outline" labelPosition="right"/> : null
                                         }
                                             
-                                            <Button circular basic color="red" disabled={isSubmitted && !isReviewer} onClick={(e) => removeQuestion(retrievedQuestion ? retrievedQuestion._id:null,index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
+                                            <Button compact basic color="red" disabled={isSubmitted && !isReviewer} onClick={(e) => removeQuestion(retrievedQuestion ? retrievedQuestion._id:null,index)} content="Delete" icon="trash alternate outline" labelPosition="right"/>
                                         
                                         </Segment>
                                     </Segment.Group>
@@ -186,7 +247,7 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
                             </React.Fragment>
                         );
                     })}
-                    { pageCount > 0 ? <Pagination onPageChange={handlePageSwitch} defaultActivePage={currentActivePage} totalPages={pageCount} /> : null}
+                    { pageCount > 1 ? <Pagination onPageChange={handlePageSwitch} defaultActivePage={currentActivePage} totalPages={pageCount} /> : null}
                 </div>
             </motion.div>
         </>
