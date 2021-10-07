@@ -1,10 +1,8 @@
 import { useState, useEffect, useContext } from "react";
 import { Card, Grid, Image, Label, Icon, Button } from 'semantic-ui-react';
 
-import Navbar from "../components/Navbar"
+import Navbar from "./Navbar"
 import { PaperContext } from "../context/paperContext";
-// import AuthorList from "../components/admin-panel/authorList"
-// import NewAuthor from "../components/admin-panel/newAuthor"
 
 const GradeDisplay = ({gradeName, isLive}) => {
     console.log(isLive)
@@ -33,7 +31,7 @@ const GradeDisplay = ({gradeName, isLive}) => {
     )
 }
 
-const AuthorManagement = () => {
+const GradesSubjects = () => {
     const { fetchAdminGrades, authToken } = useContext(PaperContext)
     const [grades, setGrades] = useState([]);
     const [errors, setErrors] = useState([]);
@@ -70,4 +68,4 @@ const AuthorManagement = () => {
     )
 }
 
-export default AuthorManagement;
+export default GradesSubjects;

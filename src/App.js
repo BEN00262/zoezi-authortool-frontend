@@ -25,8 +25,8 @@ function App() {
                 <LoginForm/>
               </Route>
               <ProtectedRoute path="/dashboard" component={ContentPage}/>
-              <ProtectedRoute path="/analytics" component={Analytics}/>
-              <ProtectedRoute path="/notifications" component={Notifications}/>
+              {/* <ProtectedRoute path="/analytics" component={Analytics}/> */}
+              {/* <ProtectedRoute path="/notifications" component={Notifications}/> */}
               {/* <ProtectedRoute path="/admin" component={AuthorManagement}/> */}
             </Switch>
           </Container>

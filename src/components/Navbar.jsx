@@ -19,21 +19,21 @@ const Navbar = () => {
           <img src={AdminFavi} />
         </Menu.Item>
         <Menu.Menu position='right'>
-          <Menu.Item
+          {/* <Menu.Item
             as={Link} to="/analytics"
             name="My Panel"
           />
-          {/* <Menu.Item
+          <Menu.Item
               as={Link} to="/admin"
               name="Admin Panel"
             /> */}
 
-          <Menu.Item as={Link} to='/notifications'>
+          {/* <Menu.Item as={Link} to='/notifications'>
             <Icon name='bell' /> Notifications
             <Label color='teal'>
               22
             </Label>
-          </Menu.Item>
+          </Menu.Item> */}
           <Menu.Item>
             <Button primary onClick={signOut}>Sign Out</Button>
           </Menu.Item>

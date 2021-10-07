@@ -29,7 +29,7 @@ const verifyToken = () => {
 }
 
 // "https://author-tool-backend.herokuapp.com";
-axios.defaults.baseURL = "https://author-tool-backend.herokuapp.com";// 'http://localhost:3500/';
+axios.defaults.baseURL = 'http://localhost:3500/';
 // io("https://admintool-rabbitmq-consumer.herokuapp.com/");
 const socketIO = io("https://admintool-rabbitmq-consumer.herokuapp.com/");// io("http://localhost:3600/");
 
@@ -267,6 +267,12 @@ const PaperProvider = ({children}) => {
         });
     }
 
+    const fetchAdminGrades = AuthToken => {
+        return axios.get(`admin/grades`, {
+            headers: { AuthToken }
+        })
+    }
+
     return(
         <PaperContext.Provider value={{
             paperID:state.paperID,
@@ -293,6 +299,7 @@ const PaperProvider = ({children}) => {
             logoutDispatcher,
             removePaper,
             setIsRefreshingDispatch,
+            fetchAdminGrades,
             roles: state.roles,
             isSubmitted:state.isSubmitted,
             currentQuestions:state.currentQuestions,
