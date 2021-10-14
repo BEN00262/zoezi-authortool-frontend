@@ -9,7 +9,9 @@ import {
     CHANGE_PAPER_ID,
     CREATE_PAPER,
     UNSET_LOGIN_TOKEN,
-    IS_REFRESHING
+    IS_REFRESHING,
+    CHANGE_ROOT_PAPER_ID,
+    CHANGE_SPECIAL_PAPER_ID
 } from './actionTypes';
 
 // update this file later 
@@ -50,7 +52,9 @@ const reducer = (state,action) => {
         case FETCH_PAPERS:
             return produce(state, newState => {
                newState.papers = [];
-               action.payload.forEach(paper => {
+                // we need to do this twice for both special papers and this
+
+               action.payload.npapers.forEach(paper => {
                     if(!newState.papers[paper.paperType]){
                         newState.papers[paper.paperType] = {
                             papers:[]
@@ -58,6 +62,24 @@ const reducer = (state,action) => {
                     }
                     newState.papers[paper.paperType].papers.push({name:paper.paperName,id:paper._id})
                })
+
+               // we create something new
+               /*  
+                    {
+                        name
+                    }
+               */
+
+               action.payload.spapers.forEach(spaper => {
+                    if(!newState.spapers[spaper.name]){
+                        newState.spapers[spaper.name] = {
+                            name:spaper.name,
+                            _id: spaper._id
+                        };
+                    }
+
+                    // newState.papers[paper.paperType].papers.push({name:paper.paperName,id:paper._id})
+                })
             })
         case CHANGE_CURRENT_PAPER_DETAILS:
             return {
@@ -67,9 +89,25 @@ const reducer = (state,action) => {
                 paperName: action.payload.paperName,
                 paperType: action.payload.paperType
             }
+
+        case CHANGE_ROOT_PAPER_ID:
+            {
+                let myLocalState = {...state}
+                myLocalState.rootPaperID = action.payload;
+                return myLocalState;
+            }
+        case CHANGE_SPECIAL_PAPER_ID:
+            {
+                let myLocalState = {...state}
+                myLocalState.paperID = action.payload.paperID;
+                myLocalState.isSpecialPaper = true;
+                return myLocalState;
+            }
+
         case CHANGE_PAPER_ID:
             let myLocalState = {...state}
             myLocalState.paperID = action.payload.paperID;
+            myLocalState.isSpecialPaper = false;
             return myLocalState;
 
         case CREATE_PAPER:

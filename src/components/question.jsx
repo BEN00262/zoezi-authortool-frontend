@@ -15,7 +15,7 @@ const COMPREHENSION_QUESTION = "comprehension";
 const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
     const [questionType,setQuestionType] = useState(retrievedQuestion ? retrievedQuestion.questionType : NORMAL_QUESTION);
 
-    const {authToken,paperID,isSubmitted,createNotification,addQuestion,paperGrade, paperSubject} = useContext(PaperContext);
+    const {authToken,paperID,isSubmitted, isSpecialPaper,createNotification,addQuestion,paperGrade, paperSubject} = useContext(PaperContext);
 
     const handleQuestionTypeChange = (_,{ value }) => {
         setQuestionType(value);
@@ -28,7 +28,7 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
             ...question,
             paperGrade,
             paperSubject
-        },authToken)
+        },authToken, isSpecialPaper)
             .then(({data}) => {
                 if (data.success){
                     updatePaperContent(data.question,index);

@@ -104,7 +104,7 @@ const PaperImport = () => {
       trigger={
         <Button content="import excel" style={{
             marginTop:"5px"
-        }} icon="download" fluid labelPosition="right" compact primary basic/>
+        }} icon="upload" fluid labelPosition="right" compact primary basic/>
       }
     >
       <Modal.Header>Import Excel File</Modal.Header>

@@ -13,7 +13,7 @@ const PaperHOC = () => {
         paperID,fetchQuestions,
         authToken,isSubmittedDispatch,
         updatePaperDetails,searchForQuestions
-        ,isRefreshing
+        ,isRefreshing, isSpecialPaper
     } = useContext(PaperContext);
     
     const [fetchedQuestions,setFetchedQuestions] = useState([]);
@@ -43,9 +43,12 @@ const PaperHOC = () => {
         }
     },[searchTerm])
 
+    // this is where we fetch the questions from the backend but we need a way to send special papers bana
     useEffect(() => {
         setIsLoading(true);
-        fetchQuestions(paperID,authToken, currentActivePage - 1)
+
+        // we are good sasa ( just pass the status if its a special paper and the server will handle it )
+        fetchQuestions(paperID,authToken, isSpecialPaper, currentActivePage - 1)
             .then(({data}) => {
                 setPageCount(data.pageCount);
                 // console.log(data.paper);
