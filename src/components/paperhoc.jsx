@@ -13,7 +13,7 @@ const PaperHOC = () => {
         paperID,fetchQuestions,
         authToken,isSubmittedDispatch,
         updatePaperDetails,searchForQuestions
-        ,isRefreshing, isSpecialPaper
+        ,isRefreshing, isSpecialPaper, rootPaperName
     } = useContext(PaperContext);
     
     const [fetchedQuestions,setFetchedQuestions] = useState([]);
@@ -55,11 +55,17 @@ const PaperHOC = () => {
                 setFetchedQuestions(data.paper.questions);
                 isSubmittedDispatch(data.paper.isSubmitted);
 
+                // if this is a special paper we have different things
+                // this has no submissions and stuff
+                // we dont have an actual grade here --> we should pass group_name_key for special papers
+
                 updatePaperDetails({
-                    grade: data.paper.grade,
+                    grade: isSpecialPaper ? rootPaperName : data.paper.grade ,
                     subject: data.paper.subject,
-                    paperName: data.paper.paperName,
-                    paperType: data.paper.paperType
+
+                    // we dont have the paper name for special papers
+                    paperName: isSpecialPaper ?  data.paper.subject : data.paper.paperName,
+                    paperType: isSpecialPaper ? "Special Paper" : data.paper.paperType
                 });
             })
             .catch(error => {

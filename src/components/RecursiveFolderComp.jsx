@@ -7,7 +7,7 @@ import { PaperContext } from '../context/paperContext';
 // this takes in the name of the folder and the contained files
 // rootfolder --> 
 const RFolderComp = ({ parentName, spaper, rootPath, isRootFolder = false }) => {
-    const { changeRootPaperID, authToken, paperID, changeSpecialPaperID } = useContext(PaperContext);
+    const { changeRootPaperID, authToken, paperID, changeSpecialPaperID, changeSpecialPaperModalVisibility } = useContext(PaperContext);
     const [isOpen,setIsOpen] = useState(false);
     const [isFileDisplay, setIsFileDisplay] = useState(false)
     const [files, setFiles] = useState([])
@@ -16,7 +16,7 @@ const RFolderComp = ({ parentName, spaper, rootPath, isRootFolder = false }) => 
         setIsOpen(old => !old)
 
         if (isRootFolder) {
-            changeRootPaperID(spaper._id)
+            changeRootPaperID(spaper._id, spaper.name)
         }
     }
 
@@ -39,13 +39,27 @@ const RFolderComp = ({ parentName, spaper, rootPath, isRootFolder = false }) => 
             })
         }
     }, [isOpen])
+
+    const _handleFolderSelectContextMenu = (e, data) => {
+        e.preventDefault()
+        changeRootPaperID(spaper._id, spaper.name)
+
+        changeSpecialPaperModalVisibility(true)
+    }
     
     return (
         <div style={{
-            marginLeft: isRootFolder ? "inherit" : "15px"
+            marginLeft: isRootFolder ? "inherit" : "15px",
+            marginBottom:"6px"
         }}>
-            <Header as="h5" onClick={openFolder} style={{cursor:'pointer'}}>
-                <Icon disabled name={isOpen ? 'folder open' : 'folder'} />
+            <Header 
+                as="h5" onClick={openFolder} 
+                onContextMenu={(e) => {
+                    return isRootFolder ? _handleFolderSelectContextMenu(e,'nothing') : null
+                }} 
+                style={{cursor:'pointer'}}
+            >
+                <Icon color="yellow" name={isOpen ? 'folder open' : 'folder'} />
                 {parentName}
             </Header>
 
@@ -56,12 +70,11 @@ const RFolderComp = ({ parentName, spaper, rootPath, isRootFolder = false }) => 
                     })}
                 </> 
             :
-                <div style={{marginLeft:"10px", marginBottom:"10px"}} hidden={!isOpen }>
+                <div style={{marginLeft:"15px", marginBottom:"10px"}} hidden={!isOpen }>
                     <List divided verticalAlign='middle'>
                         {files.map(({subject, _id},index) => {
                             const isSelected = paperID === _id;
                             return (
-                                // onContextMenu={(e) => _handlePaperSelectContextMenu(e,`${pp._id}`)}
                                 <List.Item key={`pp_${index}`} onClick={() => changeSpecialPaperID(`${_id}`)}>
                                     <List.Icon name={isSelected ?'file alternate' : 'file alternate outline'} />
                                     <List.Content>

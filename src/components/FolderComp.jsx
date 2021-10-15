@@ -19,9 +19,11 @@ const FolderComp = ({paperType,papers,handlePaperSelect}) => {
 
     
     return (
-        <div>
+        <div style={{
+            marginBottom:"6px"
+        }}>
             <Header as="h5" onClick={() => setIsOpen(!isOpen)} style={{cursor:'pointer'}}>
-                <Icon disabled name={isOpen ? 'folder open' : 'folder'} />
+                <Icon color="yellow" name={isOpen ? 'folder open' : 'folder'} />
                 {paperType}
             </Header>
 

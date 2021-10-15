@@ -38,12 +38,10 @@ const SideBar = () => {
 
                 {Object.keys(papers).map((paperType,p_index) => {
                     return (
-                        <React.Fragment key={`pt_${p_index}`}>
-                            <FolderComp handlePaperSelect={handlePaperSelect}
-                                paperType={paperType}
-                                papers = {papers[paperType].papers}
-                            />
-                        </React.Fragment>
+                        <FolderComp key={`pt_${p_index}`} handlePaperSelect={handlePaperSelect}
+                            paperType={paperType}
+                            papers = {papers[paperType].papers}
+                        />
                     );
                 })}
 

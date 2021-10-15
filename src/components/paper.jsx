@@ -215,6 +215,7 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
                     <div style={{
                         margin:"5px"
                     }}>
+                        {/* update this */}
                         <Label content={paperType}/>
                         <Label content={paperName}/>  
                     </div> 

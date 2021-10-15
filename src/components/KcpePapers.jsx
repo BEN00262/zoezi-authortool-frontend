@@ -6,8 +6,8 @@ import axios from 'axios';
 import { PaperContext } from '../context/paperContext';
 
 const KcpePaper = () => {
-    const { authToken, rootPaperID, createNotification } = useContext(PaperContext);
-    const [open, setIsOpen] = useState(false);
+    const { authToken, rootPaperID, createNotification,isSpecialPaperModalOpen,changeSpecialPaperModalVisibility  } = useContext(PaperContext);
+    // const [open, setIsOpen] = useState(false);
     const [isPastpaper, setIsPastPaper] = useState(false);
     const [isLoading,setIsLoading] = useState(false);
     const [time, setTime] = useState("")
@@ -35,7 +35,7 @@ const KcpePaper = () => {
     });
 
     const setOpen = (value) => {
-        setIsOpen(value);
+        changeSpecialPaperModalVisibility(value);
 
         if (!value){
             setDisplayError(false);
@@ -54,6 +54,9 @@ const KcpePaper = () => {
             rootID: rootPaperID,
         }
 
+        // this is pretty rough i must say buana 
+        // find a better way to store the questions
+
         axios.post("/special-paper", paperDescription,{
             headers: { AuthToken: authToken }
         })
@@ -64,7 +67,7 @@ const KcpePaper = () => {
                     throw new Error("Failed to create paper");
                 }
 
-                setIsOpen(false)
+                changeSpecialPaperModalVisibility(false)
                 createNotification("Success!", "success", "Paper created successfully");
 
                 // we have the paper do stuff with it buana
@@ -74,7 +77,7 @@ const KcpePaper = () => {
             .catch(error => {
 
                 createNotification("Error!", "danger", "Failed to create paper")
-                setIsOpen(false)
+                changeSpecialPaperModalVisibility(false)
             })
     }
 
@@ -106,14 +109,17 @@ const KcpePaper = () => {
   return (
     <Modal
       onClose={() => setOpen(false)}
-      onOpen={() => setOpen(true)}
+    //   onOpen={() => setOpen(true)}
       size="tiny"
-      open={open}
-      trigger={
-        <Button content="kcpe past/model paper" style={{
-            marginTop:"5px"
-        }} icon='pencil alternate' fluid labelPosition="right" compact primary basic/>
-      }
+      open={isSpecialPaperModalOpen}
+
+    //   we want to trigger this modal without the button buana
+    //   trigger={
+    //     <Button content="kcpe past/model paper" style={{
+    //         marginTop:"5px"
+    //     }} icon='pencil alternate' fluid labelPosition="right" compact primary basic/>
+    //   }
+
     >
       <Modal.Header>KCPE model/past paper</Modal.Header>
         <Modal.Content>

@@ -16,7 +16,8 @@ import {
     CHANGE_SPECIAL_PAPER_ID,
     CREATE_PAPER,
     IS_REFRESHING,
-    CHANGE_ROOT_PAPER_ID
+    CHANGE_ROOT_PAPER_ID,
+    IS_SPECIAL_PAPER_MODAL_OPEN
 } from './actionTypes';
 import reducer from "./reducer";
 
@@ -41,7 +42,9 @@ let initialContext = {
     roles: localStorage.getItem("roles") ? localStorage.getItem("roles").split(",") : [],
     isSubmitted: false,
     isSpecialPaper: false,
+    isSpecialPaperModalOpen: false,
     rootPaperID: "", // used by special papers only
+    rootPaperName: "", // for special papers only ( I should seriously think about this design .... later though )
     paperID: "",
     paperName: "",
     paperGrade: "",
@@ -91,6 +94,13 @@ const PaperProvider = ({ children }) => {
         });
     }
 
+    const changeSpecialPaperModalVisibility = (state) => {
+        dispatch({
+            type: IS_SPECIAL_PAPER_MODAL_OPEN,
+            payload: state
+        })
+    }
+
     const removePaper = (paperID, authToken) => {
         return axios.delete(`/remove-paper/${paperID}`, {
             headers: { AuthToken: authToken }
@@ -128,10 +138,13 @@ const PaperProvider = ({ children }) => {
     }
 
     // special paper change root id dispatcher
-    const changeRootPaperID = (rootPaperID) => {
+    const changeRootPaperID = (rootPaperID, rootPaperName) => {
         dispatch({
             type: CHANGE_ROOT_PAPER_ID,
-            payload: rootPaperID
+            payload: {
+                rootPaperID,
+                rootPaperName
+            }
         })
     }
 
@@ -307,7 +320,9 @@ const PaperProvider = ({ children }) => {
         <PaperContext.Provider value = {
             {
                 rootPaperID: state.rootPaperID,
+                rootPaperName: state.rootPaperName,
                 isSpecialPaper: state.isSpecialPaper,
+                isSpecialPaperModalOpen: state.isSpecialPaperModalOpen,
                 paperID: state.paperID,
                 papers: state.papers,
                 spapers: state.spapers,
@@ -316,6 +331,7 @@ const PaperProvider = ({ children }) => {
                 paperGrade: state.paperGrade,
                 paperSubject: state.paperSubject,
                 paperType: state.paperType,
+                changeSpecialPaperModalVisibility,
                 changeRootPaperID,
                 updatePaperDetails,
                 changeSpecialPaperID,

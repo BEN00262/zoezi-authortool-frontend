@@ -11,7 +11,8 @@ import {
     UNSET_LOGIN_TOKEN,
     IS_REFRESHING,
     CHANGE_ROOT_PAPER_ID,
-    CHANGE_SPECIAL_PAPER_ID
+    CHANGE_SPECIAL_PAPER_ID,
+    IS_SPECIAL_PAPER_MODAL_OPEN
 } from './actionTypes';
 
 // update this file later 
@@ -81,6 +82,12 @@ const reducer = (state,action) => {
                     // newState.papers[paper.paperType].papers.push({name:paper.paperName,id:paper._id})
                 })
             })
+        case IS_SPECIAL_PAPER_MODAL_OPEN:
+            {
+                let myLocalState = {...state}
+                myLocalState.isSpecialPaperModalOpen = action.payload;
+                return myLocalState;
+            }
         case CHANGE_CURRENT_PAPER_DETAILS:
             return {
                 ...state,
@@ -93,7 +100,8 @@ const reducer = (state,action) => {
         case CHANGE_ROOT_PAPER_ID:
             {
                 let myLocalState = {...state}
-                myLocalState.rootPaperID = action.payload;
+                myLocalState.rootPaperID = action.payload.rootPaperID;
+                myLocalState.rootPaperName = action.payload.rootPaperName;
                 return myLocalState;
             }
         case CHANGE_SPECIAL_PAPER_ID:
