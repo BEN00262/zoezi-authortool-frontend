@@ -5,12 +5,14 @@ import 'suneditor/dist/css/suneditor.min.css';
 import SCard from './SCard';
 import NormalQuestionComp from "./normalQues";
 import Comprehension from "./comprehension";
+import CBCQuestionComp from "./cbc";
 
 import {PaperContext} from "../context/paperContext";
 
 
 const NORMAL_QUESTION = "normal";
 const COMPREHENSION_QUESTION = "comprehension";
+const CBC_QUESTION = "cbc";
 
 const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
     const [questionType,setQuestionType] = useState(retrievedQuestion ? retrievedQuestion.questionType : NORMAL_QUESTION);
@@ -49,6 +51,8 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
                 return <NormalQuestionComp saveQuestionToDatabase={saveQuestionToDatabase}/>
             case COMPREHENSION_QUESTION:
                 return <Comprehension saveQuestionToDatabase={saveQuestionToDatabase}/>
+            case CBC_QUESTION:
+                return <CBCQuestionComp  saveQuestionToDatabase={saveQuestionToDatabase}/>
             default:
                 return null;
         }
@@ -61,6 +65,13 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
             case COMPREHENSION_QUESTION:
                 return <Comprehension isSubmitted={isSubmitted} 
                             saveQuestionToDatabase={saveQuestionToDatabase} retrievedQuestion={retrievedQuestion} index={index}/>
+            case CBC_QUESTION:
+                return <CBCQuestionComp 
+                    isSubmitted={isSubmitted} 
+                    saveQuestionToDatabase={saveQuestionToDatabase}
+                    retrievedQuestion={retrievedQuestion} index={index}    
+                />
+            
             default:
                 return null;
         }
@@ -68,7 +79,8 @@ const QuestionComp = ({updatePaperContent,retrievedQuestion = {},index}) => {
 
     const options = [
         { key: 1, text: 'Normal', value: 'normal' },
-        { key: 2, text: 'Comprehension', value: 'comprehension' }
+        { key: 2, text: 'Comprehension', value: 'comprehension' },
+        { key: 3, text: 'CBC', value: 'cbc' }
     ]
 
     return (

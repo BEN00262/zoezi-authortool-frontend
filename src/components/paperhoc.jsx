@@ -29,11 +29,10 @@ const PaperHOC = () => {
 
     useEffect(() => {
         if (searchTerm !== null){
-            searchForQuestions(authToken,paperID,searchTerm)
+            searchForQuestions(authToken,paperID,searchTerm, isSpecialPaper)
             .then(({ data }) => {
                 if (data && data.success){
                     setPageCount(1);
-                    console.log(data);
                     setFetchedQuestions(data.paper.questions);
                 }
             })
@@ -91,10 +90,6 @@ const PaperHOC = () => {
             </Segment>
         );
     }
-
-    console.log(
-        fetchedQuestions[0]
-    )
     
     return (
         <>

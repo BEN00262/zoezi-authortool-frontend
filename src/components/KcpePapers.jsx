@@ -7,32 +7,37 @@ import { PaperContext } from '../context/paperContext';
 
 const KcpePaper = () => {
     const { authToken, rootPaperID, createNotification,isSpecialPaperModalOpen,changeSpecialPaperModalVisibility  } = useContext(PaperContext);
-    // const [open, setIsOpen] = useState(false);
     const [isPastpaper, setIsPastPaper] = useState(false);
     const [isLoading,setIsLoading] = useState(false);
     const [time, setTime] = useState("")
     const [isTimed, setIsTimed] = useState(false)
 
+    // this should not be hardcoded
     const [gradeSelection,setGradeSelection] = useState([
         {key: "index_0", text: "Model Paper", value: "Model Paper"},
         {key: "index_1", text: "Past Paper", value: "Past Paper"}
     ]);
 
-    const [availableSubjects,setAvailableSubjects] = useState([
-        {key: "index_0", text: "Kiswahili", value: "Kiswahili"},
-        {key: "index_1", text: "English", value: "English"}
-    ]);
+    // create suggesters for other things
+    const supported_subjects = ["Kiswahili", "English", "Mathematics", "Science", "SST&CRE"]
+    const [availableSubjects,setAvailableSubjects] = useState([]);
 
     const [errors, setErrors] = useState(null);
     const [displayError,setDisplayError] = useState(false);
-
-    // kcpe papers are yeared and u cant create a paper twice if attempted the system will complain
     
     const [paper,setPaper] = useState({
         paperType:"",
         name_or_year:"",
         subject: ""
     });
+
+    useEffect(() => {
+        setAvailableSubjects(supported_subjects.map((subject, index) => ({
+            key: `available_subject_${index}`,
+            text: subject,
+            value: subject
+        })))
+    }, [])
 
     const setOpen = (value) => {
         changeSpecialPaperModalVisibility(value);
@@ -44,6 +49,7 @@ const KcpePaper = () => {
     }
 
     const handleSubmit = () => {
+        setIsLoading(true)
         let split_time = time.split(":")
         let duration = (((+split_time[0]) * 60) + (+split_time[1])) * 60000;
 
@@ -54,29 +60,20 @@ const KcpePaper = () => {
             rootID: rootPaperID,
         }
 
-        // this is pretty rough i must say buana 
-        // find a better way to store the questions
-
         axios.post("/special-paper", paperDescription,{
             headers: { AuthToken: authToken }
         })
             .then(({data}) => {
-                // check the data received and act upon it
-                // just inform the person that a new folder has been created a given location
                 if (!(data.status)){
                     throw new Error("Failed to create paper");
                 }
-
-                changeSpecialPaperModalVisibility(false)
                 createNotification("Success!", "success", "Paper created successfully");
-
-                // we have the paper do stuff with it buana
-                // we can open the paper or whatever
-                console.log(data)
             })
             .catch(error => {
-
                 createNotification("Error!", "danger", "Failed to create paper")
+            })
+            .finally(() => {
+                setIsLoading(false)
                 changeSpecialPaperModalVisibility(false)
             })
     }
@@ -104,22 +101,11 @@ const KcpePaper = () => {
         }));
     }
 
-    // kcpe papers by default are yeared the sample ones are not
-
   return (
     <Modal
       onClose={() => setOpen(false)}
-    //   onOpen={() => setOpen(true)}
       size="tiny"
       open={isSpecialPaperModalOpen}
-
-    //   we want to trigger this modal without the button buana
-    //   trigger={
-    //     <Button content="kcpe past/model paper" style={{
-    //         marginTop:"5px"
-    //     }} icon='pencil alternate' fluid labelPosition="right" compact primary basic/>
-    //   }
-
     >
       <Modal.Header>KCPE model/past paper</Modal.Header>
         <Modal.Content>

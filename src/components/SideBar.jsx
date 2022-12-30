@@ -44,14 +44,7 @@ const SideBar = () => {
                         />
                     );
                 })}
-
-                {/* special folders for kcpe and past papers */}
-
-                <Divider horizontal>special papers</Divider>
-
-                <div>
-                    <RecursiveFolderComp/>
-                </div>
+                <RecursiveFolderComp/>
             </div>
         </>
     );

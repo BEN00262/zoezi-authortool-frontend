@@ -32,9 +32,8 @@ const verifyToken = () => {
 }
 
 // "https://author-tool-backend.herokuapp.com";
-axios.defaults.baseURL = 'http://localhost:3500/';
-// io("https://admintool-rabbitmq-consumer.herokuapp.com/");
-const socketIO = io("https://admintool-rabbitmq-consumer.herokuapp.com/"); // io("http://localhost:3600/");
+axios.defaults.baseURL = 'http://localhost:3500/'; // "https://author-tool-backend.herokuapp.com";//'http://localhost:3500/';
+const socketIO = io("https://admintool-rabbitmq-consumer.herokuapp.com/");
 
 let initialContext = {
     authToken: verifyToken(),
@@ -101,8 +100,8 @@ const PaperProvider = ({ children }) => {
         })
     }
 
-    const removePaper = (paperID, authToken) => {
-        return axios.delete(`/remove-paper/${paperID}`, {
+    const removePaper = (paperID, authToken, is_special = false) => {
+        return axios.delete(`/remove-paper/${paperID}/${is_special}`, {
             headers: { AuthToken: authToken }
         });
     }
@@ -113,8 +112,8 @@ const PaperProvider = ({ children }) => {
         });
     }
 
-    const searchForQuestions = (authToken, paperID, searchTerm) => {
-        return axios.get(`/search/${paperID}?${searchTerm}`, {
+    const searchForQuestions = (authToken, paperID, searchTerm, is_special = false) => {
+        return axios.get(`/search/${paperID}/${is_special}?${searchTerm}`, {
             headers: { AuthToken: authToken }
         });
     }
@@ -319,18 +318,7 @@ const PaperProvider = ({ children }) => {
     return ( 
         <PaperContext.Provider value = {
             {
-                rootPaperID: state.rootPaperID,
-                rootPaperName: state.rootPaperName,
-                isSpecialPaper: state.isSpecialPaper,
-                isSpecialPaperModalOpen: state.isSpecialPaperModalOpen,
-                paperID: state.paperID,
-                papers: state.papers,
-                spapers: state.spapers,
-                paperName: state.paperName,
-                authToken: state.authToken,
-                paperGrade: state.paperGrade,
-                paperSubject: state.paperSubject,
-                paperType: state.paperType,
+                ...state,
                 changeSpecialPaperModalVisibility,
                 changeRootPaperID,
                 updatePaperDetails,
@@ -352,12 +340,7 @@ const PaperProvider = ({ children }) => {
                 removePaper,
                 setIsRefreshingDispatch,
                 fetchAdminGrades,
-                roles: state.roles,
-                isSubmitted: state.isSubmitted,
-                currentQuestions: state.currentQuestions,
                 socketIO,
-                socket_io_id: state.socket_io_id,
-                isRefreshing: state.isRefreshing
             }
         } > { children } </PaperContext.Provider>
     );

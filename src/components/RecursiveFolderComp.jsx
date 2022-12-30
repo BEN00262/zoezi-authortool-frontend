@@ -1,6 +1,6 @@
 import axios from 'axios';
-import React, { useState, useContext, useEffect, useMemo } from 'react';
-import { Icon, List, Header } from 'semantic-ui-react';
+import React, { useState, useContext, useEffect } from 'react';
+import { Icon, List, Header, Divider } from 'semantic-ui-react';
 import { PaperContext } from '../context/paperContext';
 
 
@@ -49,7 +49,7 @@ const RFolderComp = ({ parentName, spaper, rootPath, isRootFolder = false }) => 
     
     return (
         <div style={{
-            marginLeft: isRootFolder ? "inherit" : "15px",
+            marginLeft: isRootFolder ? "inherit" : "18px",
             marginBottom:"6px"
         }}>
             <Header 
@@ -70,7 +70,7 @@ const RFolderComp = ({ parentName, spaper, rootPath, isRootFolder = false }) => 
                     })}
                 </> 
             :
-                <div style={{marginLeft:"15px", marginBottom:"10px"}} hidden={!isOpen }>
+                <div style={{marginLeft:"18px", marginBottom:"10px"}} hidden={!isOpen }>
                     <List divided verticalAlign='middle'>
                         {files.map(({subject, _id},index) => {
                             const isSelected = paperID === _id;
@@ -102,16 +102,17 @@ const RecursiveFolderComp = () => {
 
     // for now we set only the top level elements as root its
 
-
     return (
-        <>
+        <div>
+            {Object.keys(spapers).length ? <Divider horizontal>special papers</Divider> : null }
+
             {Object.entries(spapers).map(([name, spaper]) => {
                 return <RFolderComp 
                     parentName={name} spaper={spaper} 
                     rootPath={spaper._id} isRootFolder={true}
                 />
             })}
-        </>
+        </div>
     )
 }
 

@@ -36,11 +36,19 @@ const reducer = (state,action) => {
                 newState.authToken = null;
                 newState.roles = null;
                 newState.isSubmitted = false;
+                newState.isSpecialPaper = false;
+                newState.isSpecialPaperModalOpen = false;
+                newState.rootPaperID = "";
+                newState.rootPaperName = "";
                 newState.paperID = "";
                 newState.paperName = "";
                 newState.paperGrade = "";
                 newState.paperSubject = "";
+                newState.paperType = "";
                 newState.papers = {};
+                newState.spapers = {};
+                // newState.socket_io_id = null; --> not sure about this one think about it
+                newState.isRefreshing = false;
             })
         case UPDATE_IS_SUBMITTED:
             return produce(state,draft => {
@@ -64,13 +72,6 @@ const reducer = (state,action) => {
                     newState.papers[paper.paperType].papers.push({name:paper.paperName,id:paper._id})
                })
 
-               // we create something new
-               /*  
-                    {
-                        name
-                    }
-               */
-
                action.payload.spapers.forEach(spaper => {
                     if(!newState.spapers[spaper.name]){
                         newState.spapers[spaper.name] = {
@@ -78,8 +79,6 @@ const reducer = (state,action) => {
                             _id: spaper._id
                         };
                     }
-
-                    // newState.papers[paper.paperType].papers.push({name:paper.paperName,id:paper._id})
                 })
             })
         case IS_SPECIAL_PAPER_MODAL_OPEN:

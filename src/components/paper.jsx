@@ -1,5 +1,5 @@
 import React,{useState,useContext,useEffect} from "react";
-import {Button,Header,Transition,Segment,Label,Pagination } from "semantic-ui-react";
+import {Button,Header,Transition,Segment,Label,Pagination, Icon } from "semantic-ui-react";
 import {motion} from 'framer-motion';
 
 import QuestionComp from "./question";
@@ -11,7 +11,8 @@ const CAN_REVIEW = "can:review";
 
 
 const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentActivePage}) => {
-    const {authToken
+    const {
+        authToken
         ,createNotification
         ,paperID
         ,setIsSample
@@ -23,9 +24,11 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
         ,submitPaperDispatch
         ,approveQuestionDispatch
         ,removeQuestionDispatch
-        ,socket_io_id,
-        paperType
-        ,roles} = useContext(PaperContext);
+        ,socket_io_id
+        ,paperType
+        ,isSpecialPaper
+        ,roles
+    } = useContext(PaperContext);
 
     const check_role = (role_required) => roles.includes(role_required);
     const isReviewer = check_role(CAN_REVIEW);
@@ -83,7 +86,7 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
         if (!reply)
             return;
 
-        removePaper(paperID,authToken)
+        removePaper(paperID,authToken, isSpecialPaper)
             .then(({data}) => {
                 if (data){
                     if (data.success){
@@ -215,9 +218,29 @@ const Paper = ({fetched_questions=[], pageCount,setCurrectActivePage, currentAct
                     <div style={{
                         margin:"5px"
                     }}>
-                        {/* update this */}
-                        <Label content={paperType}/>
-                        <Label content={paperName}/>  
+                        <Label>
+                            Paper Type
+                            <Label.Detail>{paperType}</Label.Detail>
+                        </Label>
+                        <Label>
+                            Paper Name
+                            <Label.Detail>{paperName}</Label.Detail>
+                        </Label>
+                        <Label>
+                            Number of Questions
+                            <Label.Detail>{paperQuestions.length}</Label.Detail>
+                        </Label>
+                        {/* check circle outline */}
+                        {/* ban */}
+                        <Label>
+                            Submitted
+                            <Label.Detail>
+                                <Icon 
+                                    color={isSubmitted ? "green": "red"} 
+                                    name={isSubmitted ? "check circle outline": "ban"} 
+                                />
+                            </Label.Detail>
+                        </Label>
                     </div> 
                 </div>
                 
