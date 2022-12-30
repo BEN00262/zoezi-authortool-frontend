@@ -98,7 +98,7 @@ const RFolderComp = ({ parentName, spaper, rootPath, isRootFolder = false }) => 
 }
 
 const RecursiveFolderComp = () => {
-    const { spapers, changeRootPaperID } = useContext(PaperContext);
+    const { spapers } = useContext(PaperContext);
 
     // for now we set only the top level elements as root its
 

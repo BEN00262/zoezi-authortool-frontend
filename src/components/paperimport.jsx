@@ -43,7 +43,7 @@ const PaperImport = () => {
             setDisplayError(true);
         })
 
-    },[]);
+    },[authToken]);
 
     const handleSubmit = () => {
         setDisplayError(false);

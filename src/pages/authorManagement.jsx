@@ -13,7 +13,7 @@ const GradeDisplay = ({gradeName, isLive}) => {
             // take the guy to the details of the grade
             console.log("Clicked")
         }}>
-            <Image src={`https://zoezi-staging3.herokuapp.com/img/${gradeName}.png`} fluid wrapped ui={false} />
+            <Image src={`${process.env.REACT_APP_ZOEZI_MAIN_SERVER_ENDPOINT}/img/${gradeName}.png`} fluid wrapped ui={false} />
             <Card.Content textAlign="center">
                 <Card.Header>{gradeName.toUpperCase()}</Card.Header>
                 <Card.Meta>

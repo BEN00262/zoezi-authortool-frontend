@@ -32,8 +32,8 @@ const verifyToken = () => {
 }
 
 // "https://author-tool-backend.herokuapp.com";
-axios.defaults.baseURL = 'http://localhost:3500/'; // "https://author-tool-backend.herokuapp.com";//'http://localhost:3500/';
-const socketIO = io("https://admintool-rabbitmq-consumer.herokuapp.com/");
+axios.defaults.baseURL = process.env.REACT_APP_AUTHOR_SERVER_ENDPOINT; // 'http://localhost:3500/'; // "https://author-tool-backend.herokuapp.com";//'http://localhost:3500/';
+const socketIO = io(process.env.REACT_APP_RABBIT_MQ_CONSUMER_ENDPOINT);
 
 let initialContext = {
     authToken: verifyToken(),
@@ -148,6 +148,8 @@ const PaperProvider = ({ children }) => {
     }
 
     const loginDispatch = (loginCreds) => {
+        console.log(process.env.REACT_APP_AUTHOR_SERVER_ENDPOINT);
+        
         axios.post("/user/login", loginCreds)
             .then(({ data }) => {
                 if (data.success) {

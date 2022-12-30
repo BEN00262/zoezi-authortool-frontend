@@ -8,7 +8,7 @@ const Notifications = () => (
   <Feed>
     <Feed.Event>
       <Feed.Label>
-        <img src='/images/avatar/small/elliot.jpg' />
+        <img src='/images/avatar/small/elliot.jpg' alt="student holder"/>
       </Feed.Label>
       <Feed.Content>
         <Feed.Summary>

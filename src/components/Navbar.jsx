@@ -16,7 +16,7 @@ const Navbar = () => {
     return (
       <Menu size='small' attached="top" style={{marginTop:"5px"}}>
         <Menu.Item header as={Link} to="/dashboard">
-          <img src={AdminFavi} />
+          <img src={AdminFavi} alt="admin favicon" />
         </Menu.Item>
         <Menu.Menu position='right'>
           {/* <Menu.Item
