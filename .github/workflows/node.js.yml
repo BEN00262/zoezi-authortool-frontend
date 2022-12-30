@@ -30,5 +30,5 @@ jobs:
     - run: npm ci --production
     - run: cp ~/env/.frontend-env .env
     - run: npm run build
-    - run: pm2 start npm --no-automation --name "AuthoringMainFrontend" -- run "production"
+    - run: pm2 start npm --no-automation --name "AuthoringMainFrontend" -- run "start:production"
     - run: pm2 reload all --update-env --time
