@@ -26,7 +26,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    # - run: pm2 stop all
+    - run: chmod +x ./deployment.sh
+    - run: ./deployment.sh
     # - run: npm ci --production
     # - run: cp ~/env/.frontend-env .env
     # - run: npm run build
