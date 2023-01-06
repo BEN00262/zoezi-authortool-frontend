@@ -11,7 +11,8 @@
 .env
 
 # production
-/build
+# this is bad but i dont want to set up any ci/cd stuff am tired buana
+# /build
 
 # misc
 .DS_Store
